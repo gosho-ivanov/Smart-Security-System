@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log In — Smart Security System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+<div class="auth-wrapper">
+
+  <!-- Left Panel -->
+  <div class="auth-left">
+    <div class="auth-brand">
+      <div class="brand-icon">
+        <i class="bi bi-shield-lock-fill"></i>
+      </div>
+      <h1>SecureGuard</h1>
+      <p>Enterprise-grade security management for your home and business.</p>
+    </div>
+
+    <div class="auth-features">
+      <div class="auth-feature-item">
+        <div class="feat-icon"><i class="bi bi-camera-video"></i></div>
+        <span>Real-time camera monitoring with live feeds</span>
+      </div>
+      <div class="auth-feature-item">
+        <div class="feat-icon"><i class="bi bi-fingerprint"></i></div>
+        <span>Biometric fingerprint authentication</span>
+      </div>
+      <div class="auth-feature-item">
+        <div class="feat-icon"><i class="bi bi-grid-3x3-gap"></i></div>
+        <span>Multi-door PIN code access control</span>
+      </div>
+      <div class="auth-feature-item">
+        <div class="feat-icon"><i class="bi bi-bell-fill"></i></div>
+        <span>Instant security alerts and notifications</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="auth-right">
+    <div class="auth-form-box">
+      <p class="form-subtitle" style="margin-bottom:6px;">
+        <a href="{{ url_for('main.index') }}" style="color:var(--text-muted);font-size:13px;display:inline-flex;align-items:center;gap:5px;">
+          <i class="bi bi-arrow-left"></i> Back to home
+        </a>
+      </p>
+      <h2 class="form-title">Welcome back</h2>
+      <p class="form-subtitle">Sign in to your security dashboard</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}{% for category, message in messages %}
+          <div class="alert-box alert-{{ 'danger' if category == 'danger' else 'success' }} mb-4">
+            <i class="bi bi-{{ 'exclamation-triangle' if category == 'danger' else 'check-circle' }}"></i>
+            {{ message }}
+          </div>
+        {% endfor %}{% endif %}
+      {% endwith %}
+
+      <form method="POST" action="{{ url_for('auth.login') }}">
+        <div class="mb-3">
+          <label class="form-label">Email address</label>
+          <div class="input-icon-wrap">
+            <i class="bi bi-envelope input-icon"></i>
+            <input type="email" name="email" class="form-control" placeholder="you@example.com" required autocomplete="email" />
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <div class="d-flex align-items-center justify-content-between mb-1">
+            <label class="form-label mb-0">Password</label>
+            <a href="{{ url_for('auth.forgot_password') }}" style="font-size:12.5px;color:var(--primary);font-weight:600;">Forgot password?</a>
+          </div>
+          <div class="input-icon-wrap">
+            <i class="bi bi-lock input-icon"></i>
+            <input type="password" name="password" class="form-control" placeholder="Enter your password" required autocomplete="current-password" />
+          </div>
+        </div>
+
+        <div class="mb-4 d-flex align-items-center gap-2">
+          <input type="checkbox" class="form-check-input" id="remember" name="remember" style="margin:0;" />
+          <label for="remember" class="form-label mb-0" style="font-size:13px;cursor:pointer;">Keep me signed in</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full btn-lg mb-4">
+          <i class="bi bi-box-arrow-in-right"></i> Sign In
+        </button>
+      </form>
+
+      <p style="text-align:center;font-size:13.5px;color:var(--text-muted);">
+        Don't have an account?
+        <a href="{{ url_for('auth.signup') }}" style="color:var(--primary);font-weight:700;">Create one</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

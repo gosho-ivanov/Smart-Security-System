@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}Doors — Smart Security System{% endblock %}
+{% block page_title %}Doors{% endblock %}
+{% block page_subtitle %}Control and monitor all access points{% endblock %}
+
+{% block content %}
+
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+  <div class="search-bar">
+    <i class="bi bi-search"></i>
+    <input type="text" class="form-control" placeholder="Search doors…" id="doorSearch" />
+  </div>
+  <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addDoorModal">
+    <i class="bi bi-plus-lg"></i> Add Door
+  </button>
+</div>
+
+<!-- Doors Table -->
+<div class="card">
+  <div class="card-header">
+    <i class="bi bi-door-closed text-primary-color"></i>
+    <h5>Access Points</h5>
+    <div class="card-header-actions">
+      <span style="font-size:12.5px;color:var(--text-muted);">4 doors registered</span>
+    </div>
+  </div>
+  <div class="card-body" style="padding:0;">
+    <div class="table-responsive">
+      <table class="data-table" id="doorTable">
+        <thead>
+          <tr>
+            <th>Door Name</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Access Methods</th>
+            <th>Last Access</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for door in [
+            {'name': 'Main Entrance', 'location': 'Front of House',  'status': 'Locked',   'methods': ['PIN Code', 'Fingerprint'], 'last': 'Oct 27 · 10:30 AM'},
+            {'name': 'Back Door',     'location': 'Rear of House',   'status': 'Unlocked', 'methods': ['PIN Code', 'Fingerprint'], 'last': 'Oct 27 · 09:15 AM'},
+            {'name': 'Garage Door',   'location': 'Garage',          'status': 'Locked',   'methods': ['PIN Code'],               'last': 'Oct 26 · 06:45 PM'},
+            {'name': 'Side Gate',     'location': 'East Side Yard',  'status': 'Locked',   'methods': ['Fingerprint'],            'last': 'Oct 26 · 02:10 PM'},
+          ] %}
+          <tr class="door-row" data-name="{{ door.name|lower }}">
+            <td>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div class="door-icon-wrap {{ 'locked' if door.status == 'Locked' else 'unlocked' }}" style="width:34px;height:34px;font-size:14px;">
+                  <i class="bi bi-lock{% if door.status == 'Unlocked' %}-open{% endif %}-fill"></i>
+                </div>
+                <span style="font-weight:600;">{{ door.name }}</span>
+              </div>
+            </td>
+            <td style="color:var(--text-secondary);">
+              <i class="bi bi-geo-alt" style="font-size:12px;margin-right:4px;"></i>{{ door.location }}
+            </td>
+            <td>
+              <span class="door-badge {{ 'locked' if door.status == 'Locked' else 'unlocked' }}">
+                {{ door.status }}
+              </span>
+            </td>
+            <td>
+              {% for method in door.methods %}
+                <span class="method-pill {{ 'method-pin' if 'PIN' in method else 'method-fp' }}">
+                  <i class="bi bi-{{ 'grid-3x3-gap' if 'PIN' in method else 'fingerprint' }}" style="font-size:10px;"></i>
+                  {{ method }}
+                </span>
+              {% endfor %}
+            </td>
+            <td style="font-size:12.5px;color:var(--text-muted);">
+              <i class="bi bi-clock" style="font-size:11px;margin-right:4px;"></i>{{ door.last }}
+            </td>
+            <td>
+              <div class="d-flex gap-2">
+                <a href="#" class="btn btn-outline-primary btn-sm">
+                  <i class="bi bi-gear"></i> Manage
+                </a>
+                <button class="btn btn-sm {{ 'btn-outline-success' if door.status == 'Locked' else 'btn-outline-danger' }}"
+                        onclick="toggleDoor(this, '{{ door.name }}')"
+                        data-status="{{ door.status }}">
+                  {% if door.status == 'Locked' %}
+                    <i class="bi bi-lock-open"></i> Unlock
+                  {% else %}
+                    <i class="bi bi-lock"></i> Lock
+                  {% endif %}
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add Door Modal -->
+<div class="modal fade" id="addDoorModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-plus-circle me-2 text-primary-color"></i>Add New Door</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="#">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Door Name</label>
+            <input type="text" name="name" class="form-control" placeholder="e.g. Main Entrance" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Location / Description</label>
+            <input type="text" name="location" class="form-control" placeholder="e.g. Front of House" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Access Methods</label>
+            <div style="display:flex;flex-direction:column;gap:10px;padding:14px;background:var(--body-bg);border-radius:var(--radius-sm);border:1px solid var(--border);">
+              <div class="d-flex align-items-center gap-2">
+                <input type="checkbox" class="form-check-input" id="m_pin" name="method_pin" value="1" checked />
+                <label for="m_pin" class="form-label mb-0" style="cursor:pointer;">
+                  <i class="bi bi-grid-3x3-gap me-1"></i> PIN Code
+                </label>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <input type="checkbox" class="form-check-input" id="m_fp" name="method_fp" value="1" />
+                <label for="m_fp" class="form-label mb-0" style="cursor:pointer;">
+                  <i class="bi bi-fingerprint me-1"></i> Fingerprint
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Add Door</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('doorSearch').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  document.querySelectorAll('.door-row').forEach(row => {
+    row.style.display = row.dataset.name.includes(q) ? '' : 'none';
+  });
+});
+
+function toggleDoor(btn, name) {
+  const isLocked = btn.dataset.status === 'Locked';
+  if (confirm(`${isLocked ? 'Unlock' : 'Lock'} "${name}"?`)) {
+    btn.dataset.status = isLocked ? 'Unlocked' : 'Locked';
+    btn.className = `btn btn-sm ${isLocked ? 'btn-outline-danger' : 'btn-outline-success'}`;
+    btn.innerHTML = isLocked
+      ? '<i class="bi bi-lock"></i> Lock'
+      : '<i class="bi bi-lock-open"></i> Unlock';
+    const row = btn.closest('tr');
+    const badge = row.querySelector('.door-badge');
+    badge.textContent = isLocked ? 'Unlocked' : 'Locked';
+    badge.className = `door-badge ${isLocked ? 'unlocked' : 'locked'}`;
+    const iconWrap = row.querySelector('.door-icon-wrap');
+    iconWrap.className = `door-icon-wrap ${isLocked ? 'unlocked' : 'locked'}`;
+    iconWrap.innerHTML = `<i class="bi bi-lock${isLocked ? '-open' : ''}-fill"></i>`;
+  }
+}
+</script>
+{% endblock %}

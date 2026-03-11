@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block title %}Allowed Personnel — Smart Security System{% endblock %}
+{% block page_title %}Allowed Personnel{% endblock %}
+{% block page_subtitle %}Manage who can access your secured zones{% endblock %}
+
+{% block content %}
+
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+  <div class="d-flex gap-2 flex-wrap">
+    <div class="search-bar">
+      <i class="bi bi-search"></i>
+      <input type="text" class="form-control" placeholder="Search personnel…" id="personnelSearch" />
+    </div>
+    <select class="form-select" style="width:auto;font-size:13.5px;height:36px;padding-top:0;padding-bottom:0;" id="statusFilter">
+      <option value="">All Statuses</option>
+      <option>Active</option>
+      <option>Inactive</option>
+    </select>
+  </div>
+  <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addPersonnelModal">
+    <i class="bi bi-person-plus"></i> Add Person
+  </button>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <i class="bi bi-people text-primary-color"></i>
+    <h5>Registered Personnel</h5>
+    <div class="card-header-actions">
+      <span style="font-size:12.5px;color:var(--text-muted);">3 registered</span>
+    </div>
+  </div>
+  <div class="card-body" style="padding:0;">
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Access Methods</th>
+            <th>Allowed Doors</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for person in [
+            {'name': 'John Doe',   'initials': 'JD', 'methods': ['PIN', 'Fingerprint'], 'doors': ['Main Entrance', 'Back Door'], 'status': 'Active'},
+            {'name': 'Jane Smith', 'initials': 'JS', 'methods': ['PIN'],                'doors': ['Main Entrance'],               'status': 'Active'},
+            {'name': 'Peter Jones','initials': 'PJ', 'methods': ['Fingerprint'],         'doors': ['Back Door'],                  'status': 'Inactive'},
+          ] %}
+          <tr class="personnel-row" data-name="{{ person.name|lower }}" data-status="{{ person.status|lower }}">
+            <td>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div class="user-avatar" style="width:36px;height:36px;font-size:12px;">{{ person.initials }}</div>
+                <div>
+                  <div style="font-weight:600;font-size:14px;">{{ person.name }}</div>
+                  <div style="font-size:11.5px;color:var(--text-muted);">{{ person.methods|join(' · ') }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              {% for method in person.methods %}
+                <span class="method-pill {{ 'method-pin' if method == 'PIN' else 'method-fp' }}">
+                  <i class="bi bi-{{ 'grid-3x3-gap' if method == 'PIN' else 'fingerprint' }}" style="font-size:10px;"></i>
+                  {{ method }}
+                </span>
+              {% endfor %}
+            </td>
+            <td>
+              {% for door in person.doors %}
+                <div style="font-size:12.5px;color:var(--text-secondary);display:flex;align-items:center;gap:4px;">
+                  <i class="bi bi-door-open" style="font-size:11px;color:var(--text-muted);"></i> {{ door }}
+                </div>
+              {% endfor %}
+            </td>
+            <td>
+              <span class="badge-pill {{ 'badge-active' if person.status == 'Active' else 'badge-inactive' }}">
+                {{ person.status }}
+              </span>
+            </td>
+            <td>
+              <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editPersonnelModal">
+                  <i class="bi bi-pencil"></i> Edit
+                </button>
+                <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#removePersonnelModal">
+                  <i class="bi bi-person-x"></i> Remove
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add Personnel Modal -->
+<div class="modal fade" id="addPersonnelModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-person-plus me-2 text-primary-color"></i>Add Person</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="#">
+        <div class="modal-body">
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label class="form-label">Full Name</label>
+              <input type="text" name="name" class="form-control" placeholder="John Doe" required />
+            </div>
+            <div class="col-6">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-control" placeholder="john@example.com" />
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Access Methods</label>
+            <div style="display:flex;gap:16px;padding:12px;background:var(--body-bg);border-radius:var(--radius-sm);border:1px solid var(--border);">
+              <div class="d-flex align-items-center gap-2">
+                <input type="checkbox" class="form-check-input" id="a_pin" name="method_pin" />
+                <label for="a_pin" class="form-label mb-0" style="cursor:pointer;"><i class="bi bi-grid-3x3-gap me-1"></i>PIN Code</label>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <input type="checkbox" class="form-check-input" id="a_fp" name="method_fp" />
+                <label for="a_fp" class="form-label mb-0" style="cursor:pointer;"><i class="bi bi-fingerprint me-1"></i>Fingerprint</label>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Allowed Doors</label>
+            <div style="display:flex;flex-direction:column;gap:8px;padding:12px;background:var(--body-bg);border-radius:var(--radius-sm);border:1px solid var(--border);">
+              {% for door in ['Main Entrance', 'Back Door', 'Garage Door', 'Side Gate'] %}
+              <div class="d-flex align-items-center gap-2">
+                <input type="checkbox" class="form-check-input" id="adoor_{{ loop.index }}" name="doors" value="{{ door }}" />
+                <label for="adoor_{{ loop.index }}" class="form-label mb-0" style="cursor:pointer;font-size:13.5px;">{{ door }}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Add Person</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Remove Personnel Modal -->
+<div class="modal fade" id="removePersonnelModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-body text-center" style="padding:28px;">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--danger-light);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:22px;color:var(--danger);">
+          <i class="bi bi-person-x"></i>
+        </div>
+        <h5 style="font-size:16px;font-weight:700;margin-bottom:8px;">Remove Person?</h5>
+        <p style="font-size:13.5px;color:var(--text-secondary);margin:0 0 20px;">This will revoke all access rights for this person immediately. Their PIN codes and fingerprint will also be deactivated.</p>
+        <div style="display:flex;gap:10px;justify-content:center;">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <form method="POST" action="#" style="display:inline;">
+            <button type="submit" class="btn btn-danger"><i class="bi bi-person-x"></i> Remove</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function filterTable() {
+  const q = document.getElementById('personnelSearch').value.toLowerCase();
+  const s = document.getElementById('statusFilter').value.toLowerCase();
+  document.querySelectorAll('.personnel-row').forEach(row => {
+    const nameMatch   = row.dataset.name.includes(q);
+    const statusMatch = !s || row.dataset.status === s;
+    row.style.display = nameMatch && statusMatch ? '' : 'none';
+  });
+}
+document.getElementById('personnelSearch').addEventListener('input', filterTable);
+document.getElementById('statusFilter').addEventListener('change', filterTable);
+</script>
+{% endblock %}

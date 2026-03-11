@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Security System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <style>
+    .landing-hero {
+      min-height: 100vh;
+      background: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .landing-hero::before {
+      content:'';
+      position:absolute;
+      width:700px;height:700px;
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(26,86,219,.18) 0%,transparent 70%);
+      top:-200px;right:-200px;
+      pointer-events:none;
+    }
+    .landing-hero::after {
+      content:'';
+      position:absolute;
+      width:500px;height:500px;
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(14,165,233,.12) 0%,transparent 70%);
+      bottom:-100px;left:-100px;
+      pointer-events:none;
+    }
+    .landing-content { position:relative;z-index:1;max-width:540px; }
+    .landing-badge {
+      display:inline-flex;align-items:center;gap:7px;
+      background:rgba(26,86,219,.18);border:1px solid rgba(26,86,219,.3);
+      color:var(--accent);font-size:12px;font-weight:700;letter-spacing:.06em;
+      padding:5px 14px;border-radius:20px;margin-bottom:24px;text-transform:uppercase;
+    }
+    .landing-title {
+      font-size:52px;font-weight:800;color:#fff;
+      line-height:1.1;letter-spacing:-2px;margin-bottom:20px;
+    }
+    .landing-title span { color:var(--accent); }
+    .landing-desc { color:#94A3B8;font-size:16px;line-height:1.7;margin-bottom:40px; }
+    .landing-btns { display:flex;gap:14px;justify-content:center; }
+    .landing-btn-primary {
+      background:var(--primary);color:#fff;padding:13px 32px;
+      border-radius:var(--radius-sm);font-weight:700;font-size:15px;
+      border:none;cursor:pointer;transition:all .18s ease;
+      display:inline-flex;align-items:center;gap:8px;
+      box-shadow:0 4px 16px rgba(26,86,219,.4);text-decoration:none;
+    }
+    .landing-btn-primary:hover { background:var(--primary-dark);color:#fff;transform:translateY(-1px); }
+    .landing-btn-outline {
+      border:1.5px solid rgba(255,255,255,.15);color:#fff;padding:13px 32px;
+      border-radius:var(--radius-sm);font-weight:700;font-size:15px;
+      background:transparent;cursor:pointer;transition:all .18s ease;
+      display:inline-flex;align-items:center;gap:8px;text-decoration:none;
+    }
+    .landing-btn-outline:hover { border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.05);color:#fff; }
+    .landing-stats {
+      margin-top:60px;display:flex;gap:40px;justify-content:center;
+      border-top:1px solid rgba(255,255,255,.08);padding-top:40px;
+    }
+    .l-stat { text-align:center; }
+    .l-stat-num { font-size:28px;font-weight:800;color:#fff;letter-spacing:-1px; }
+    .l-stat-label { font-size:12px;color:#64748B;font-weight:600;margin-top:2px; }
+
+    /* floating icons */
+    .float-icons {
+      position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0;
+    }
+    .float-icon {
+      position:absolute;opacity:.06;font-size:80px;color:#fff;
+      animation:floatAnim 12s ease-in-out infinite;
+    }
+    @keyframes floatAnim {
+      0%,100%{transform:translateY(0) rotate(0deg);}
+      50%{transform:translateY(-20px) rotate(5deg);}
+    }
+  </style>
+</head>
+<body>
+<section class="landing-hero">
+  <div class="float-icons">
+    <i class="bi bi-shield-lock float-icon" style="top:10%;left:8%;animation-delay:0s;"></i>
+    <i class="bi bi-camera-video float-icon" style="top:20%;right:6%;animation-delay:2s;font-size:60px;"></i>
+    <i class="bi bi-fingerprint float-icon" style="bottom:15%;left:10%;animation-delay:4s;font-size:70px;"></i>
+    <i class="bi bi-door-closed float-icon" style="bottom:20%;right:12%;animation-delay:1s;font-size:55px;"></i>
+    <i class="bi bi-grid-3x3-gap float-icon" style="top:50%;left:4%;animation-delay:3s;font-size:50px;"></i>
+  </div>
+
+  <div class="landing-content">
+    <div class="landing-badge">
+      <i class="bi bi-shield-check"></i>
+      Enterprise-Grade Protection
+    </div>
+
+    <h1 class="landing-title">
+      Smart Security<br /><span>System</span>
+    </h1>
+
+    <p class="landing-desc">
+      Your trusted partner in home and business security. Monitor cameras, manage door access, control PIN codes and fingerprints — all from a single dashboard.
+    </p>
+
+    <div class="landing-btns">
+      <a href="{{ url_for('auth.signup') }}" class="landing-btn-primary">
+        <i class="bi bi-person-plus"></i> Sign Up Free
+      </a>
+      <a href="{{ url_for('auth.login') }}" class="landing-btn-outline">
+        <i class="bi bi-box-arrow-in-right"></i> Log In
+      </a>
+    </div>
+
+    <div class="landing-stats">
+      <div class="l-stat">
+        <div class="l-stat-num">99.9%</div>
+        <div class="l-stat-label">Uptime</div>
+      </div>
+      <div class="l-stat">
+        <div class="l-stat-num">&lt; 1s</div>
+        <div class="l-stat-label">Response Time</div>
+      </div>
+      <div class="l-stat">
+        <div class="l-stat-num">256-bit</div>
+        <div class="l-stat-label">Encryption</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
