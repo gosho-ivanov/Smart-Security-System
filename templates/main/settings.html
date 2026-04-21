@@ -1,83 +1,83 @@
 {% extends "base.html" %}
-{% block title %}Settings — Smart Security System{% endblock %}
-{% block page_title %}Settings{% endblock %}
-{% block page_subtitle %}Manage your account preferences and security options{% endblock %}
+{% block title %}Настройки — Умна система за сигурност{% endblock %}
+{% block page_title %}Настройки{% endblock %}
+{% block page_subtitle %}Управлявайте предпочитанията и опциите за сигурност{% endblock %}
 
 {% block content %}
 
 <div class="row g-3">
   <div class="col-lg-8">
 
-    <!-- Security Options -->
+    <!-- Опции за сигурност -->
     <div class="card mb-3">
       <div class="card-header">
         <i class="bi bi-shield-lock text-primary-color"></i>
-        <h5>Security Options</h5>
+        <h5>Опции за сигурност</h5>
       </div>
       <div class="card-body">
 
         <div class="settings-item">
           <div class="settings-icon"><i class="bi bi-key-fill"></i></div>
           <div class="settings-info">
-            <div class="settings-label">Change Password</div>
-            <div class="settings-desc">Update your account password regularly to stay secure</div>
+            <div class="settings-label">Смяна на парола</div>
+            <div class="settings-desc">Актуализирайте редовно паролата на акаунта си</div>
           </div>
           <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
-            Manage
+            Управление
           </button>
         </div>
 
         <div class="settings-item">
           <div class="settings-icon"><i class="bi bi-grid-3x3-gap"></i></div>
           <div class="settings-info">
-            <div class="settings-label">PIN Reset</div>
-            <div class="settings-desc">Reset or regenerate your door access PIN codes</div>
+            <div class="settings-label">Нулиране на PIN</div>
+            <div class="settings-desc">Нулирайте или регенерирайте PIN кодовете за достъп до врати</div>
           </div>
-          <a href="{{ url_for('main.access_codes') }}" class="btn btn-outline-primary btn-sm">Manage</a>
+          <a href="{{ url_for('main.access_codes') }}" class="btn btn-outline-primary btn-sm">Управление</a>
         </div>
 
         <div class="settings-item">
           <div class="settings-icon"><i class="bi bi-fingerprint"></i></div>
           <div class="settings-info">
-            <div class="settings-label">Fingerprint Re-enrollment</div>
-            <div class="settings-desc">Clear and re-enroll your biometric fingerprint data</div>
+            <div class="settings-label">Ново записване на отпечатък</div>
+            <div class="settings-desc">Изчистете и преregistrирайте биометричните данни</div>
           </div>
-          <a href="{{ url_for('main.fingerprints') }}" class="btn btn-outline-primary btn-sm">Manage</a>
+          <a href="{{ url_for('main.fingerprints') }}" class="btn btn-outline-primary btn-sm">Управление</a>
         </div>
 
         <div class="settings-item">
           <div class="settings-icon"><i class="bi bi-phone"></i></div>
           <div class="settings-info">
-            <div class="settings-label">Two-Factor Authentication</div>
-            <div class="settings-desc">Add an extra layer of security to your account login</div>
+            <div class="settings-label">Двуфакторна автентикация</div>
+            <div class="settings-desc">Добавете допълнителен слой сигурност към влизането</div>
           </div>
-          <button class="btn btn-outline-secondary btn-sm" disabled title="Coming soon">
-            <i class="bi bi-lock"></i> Soon
+          <button class="btn btn-outline-secondary btn-sm" disabled title="Очаквайте скоро">
+            <i class="bi bi-lock"></i> Скоро
           </button>
         </div>
 
       </div>
     </div>
 
-    <!-- Notification Preferences -->
+    <!-- Известия -->
     <div class="card mb-3">
       <div class="card-header">
         <i class="bi bi-bell text-primary-color"></i>
-        <h5>Notification Preferences</h5>
+        <h5>Известия</h5>
       </div>
       <div class="card-body">
 
         {% for notif in [
-          {'label': 'Email Notifications',        'desc': 'Receive security alerts via email',            'key': 'email_notif',   'on': true},
-          {'label': 'SMS Notifications',           'desc': 'Receive security alerts via SMS',             'key': 'sms_notif',     'on': false},
-          {'label': 'Failed Access Attempts',      'desc': 'Alert when a wrong PIN or finger is used',   'key': 'fail_notif',    'on': true},
-          {'label': 'Motion Detection Alerts',     'desc': 'Alert when motion is detected by cameras',   'key': 'motion_notif',  'on': true},
-          {'label': 'Door Unlock Alerts',          'desc': 'Alert when any door is unlocked',            'key': 'door_notif',    'on': false},
-          {'label': 'System Status Alerts',        'desc': 'Notify on system updates or issues',         'key': 'sys_notif',     'on': true},
+          {'label': 'Имейл известия',                'desc': 'Получавайте известия за сигурност по имейл',              'key': 'email_notif',   'on': true},
+          {'label': 'SMS известия',                  'desc': 'Получавайте известия за сигурност чрез SMS',              'key': 'sms_notif',     'on': false},
+          {'label': 'Неуспешни опити за достъп',     'desc': 'Известяване при грешен PIN или отпечатък',               'key': 'fail_notif',    'on': true},
+          {'label': 'Известия за движение',          'desc': 'Известяване при засечено движение от камери',            'key': 'motion_notif',  'on': true},
+          {'label': 'Известия за отключване',        'desc': 'Известяване при отключване на врата',                    'key': 'door_notif',    'on': false},
+          {'label': 'Известия за системен статус',   'desc': 'Известяване при системни актуализации или проблеми',     'key': 'sys_notif',     'on': true},
         ] %}
         <div class="settings-item">
           <div class="settings-icon">
-            <i class="bi bi-{{ 'envelope' if 'Email' in notif.label else 'phone' if 'SMS' in notif.label else 'exclamation-triangle' if 'Failed' in notif.label else 'camera-video' if 'Motion' in notif.label else 'door-open' if 'Door' in notif.label else 'cpu' }}"></i>
+            <i class="bi bi-{{ 'envelope' if 'Имейл' in notif.label else 'phone' if 'SMS' in notif.label else 'exclamation-triangle' if 'Неуспешни' in notif.label else 'camera-video' if 'движение' in notif.label else 'door-open' if 'отключване' in notif.label else 'cpu' }}"></i>
           </div>
           <div class="settings-info">
             <div class="settings-label">{{ notif.label }}</div>
@@ -93,37 +93,37 @@
       </div>
     </div>
 
-    <!-- System Preferences -->
+    <!-- Системни предпочитания -->
     <div class="card mb-3">
       <div class="card-header">
         <i class="bi bi-sliders text-primary-color"></i>
-        <h5>System Preferences</h5>
+        <h5>Системни предпочитания</h5>
       </div>
       <div class="card-body">
 
         <div class="settings-item">
           <div class="settings-icon"><i class="bi bi-clock"></i></div>
           <div class="settings-info">
-            <div class="settings-label">Timezone</div>
-            <div class="settings-desc">Set your local timezone for accurate timestamps</div>
+            <div class="settings-label">Часова зона</div>
+            <div class="settings-desc">Задайте местната часова зона за точни времеви отпечатъци</div>
           </div>
           <select class="form-select" style="width:200px;font-size:13px;">
-            <option>UTC+00:00 (London)</option>
-            <option>UTC+02:00 (Athens)</option>
-            <option>UTC-05:00 (New York)</option>
-            <option>UTC-08:00 (Los Angeles)</option>
+            <option>UTC+02:00 (София)</option>
+            <option>UTC+00:00 (Лондон)</option>
+            <option>UTC-05:00 (Ню Йорк)</option>
+            <option>UTC-08:00 (Лос Анджелис)</option>
           </select>
         </div>
 
         <div class="settings-item">
           <div class="settings-icon"><i class="bi bi-calendar3"></i></div>
           <div class="settings-info">
-            <div class="settings-label">Date Format</div>
-            <div class="settings-desc">Choose how dates are displayed throughout the system</div>
+            <div class="settings-label">Формат на датата</div>
+            <div class="settings-desc">Изберете как да се показват датите в системата</div>
           </div>
           <select class="form-select" style="width:200px;font-size:13px;">
+            <option>ДД/ММ/ГГГГ</option>
             <option>MM/DD/YYYY</option>
-            <option>DD/MM/YYYY</option>
             <option>YYYY-MM-DD</option>
           </select>
         </div>
@@ -131,46 +131,46 @@
         <div class="settings-item">
           <div class="settings-icon"><i class="bi bi-lock-fill"></i></div>
           <div class="settings-info">
-            <div class="settings-label">Auto-Lock Timeout</div>
-            <div class="settings-desc">Automatically lock session after inactivity</div>
+            <div class="settings-label">Автоматично заключване</div>
+            <div class="settings-desc">Автоматично заключване на сесията при неактивност</div>
           </div>
           <select class="form-select" style="width:200px;font-size:13px;">
-            <option>15 minutes</option>
-            <option>30 minutes</option>
-            <option>1 hour</option>
-            <option>Never</option>
+            <option>15 минути</option>
+            <option>30 минути</option>
+            <option>1 час</option>
+            <option>Никога</option>
           </select>
         </div>
 
       </div>
     </div>
 
-    <!-- Danger Zone -->
+    <!-- Опасна зона -->
     <div class="danger-zone">
-      <h6><i class="bi bi-exclamation-triangle-fill"></i> Danger Zone</h6>
-      <p>Deactivating your account is <strong>permanent and irreversible</strong>. All your data — including door settings, PIN codes, and fingerprints — will be permanently deleted.</p>
+      <h6><i class="bi bi-exclamation-triangle-fill"></i> Опасна зона</h6>
+      <p>Деактивирането на акаунта ви е <strong>постоянно и необратимо</strong>. Всички данни — настройки на врати, PIN кодове и пръстови отпечатъци — ще бъдат изтрити завинаги.</p>
       <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deactivateModal">
-        <i class="bi bi-person-x"></i> Deactivate Account
+        <i class="bi bi-person-x"></i> Деактивирай акаунт
       </button>
     </div>
 
   </div>
 
-  <!-- Right Panel: Quick Info -->
+  <!-- Десен панел: системна информация -->
   <div class="col-lg-4">
     <div class="card mb-3">
       <div class="card-header">
         <i class="bi bi-cpu text-primary-color"></i>
-        <h5>System Info</h5>
+        <h5>Системна информация</h5>
       </div>
       <div class="card-body">
         {% for info in [
-          {'label': 'Platform',     'value': 'Raspberry Pi 5'},
-          {'label': 'Firmware',     'value': 'v2.4.1'},
-          {'label': 'Uptime',       'value': '14 days, 6h 22m'},
-          {'label': 'CPU Temp',     'value': '52°C'},
-          {'label': 'Storage',      'value': '18.4 GB / 64 GB'},
-          {'label': 'Last Backup',  'value': 'Oct 27, 2023'},
+          {'label': 'Платформа',      'value': 'Raspberry Pi 5'},
+          {'label': 'Фърмуер',        'value': 'v2.4.1'},
+          {'label': 'Работно време',  'value': '14 дни, 6ч 22м'},
+          {'label': 'Темп. CPU',      'value': '52°C'},
+          {'label': 'Съхранение',     'value': '18.4 GB / 64 GB'},
+          {'label': 'Последен архив', 'value': '27 окт. 2023'},
         ] %}
         <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-light);font-size:13.5px;">
           <span style="color:var(--text-muted);font-weight:600;">{{ info.label }}</span>
@@ -183,68 +183,68 @@
     <div class="card">
       <div class="card-header">
         <i class="bi bi-arrow-clockwise text-primary-color"></i>
-        <h5>Quick Actions</h5>
+        <h5>Бързи действия</h5>
       </div>
       <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
         <button class="btn btn-outline-secondary btn-sm" style="justify-content:flex-start;">
-          <i class="bi bi-arrow-clockwise"></i> Restart System
+          <i class="bi bi-arrow-clockwise"></i> Рестартиране на системата
         </button>
         <button class="btn btn-outline-secondary btn-sm" style="justify-content:flex-start;">
-          <i class="bi bi-download"></i> Export Access Logs
+          <i class="bi bi-download"></i> Експортиране на логове
         </button>
         <button class="btn btn-outline-secondary btn-sm" style="justify-content:flex-start;">
-          <i class="bi bi-cloud-upload"></i> Backup Configuration
+          <i class="bi bi-cloud-upload"></i> Архивиране на конфигурация
         </button>
         <button class="btn btn-outline-secondary btn-sm" style="justify-content:flex-start;">
-          <i class="bi bi-shield-check"></i> Run Security Audit
+          <i class="bi bi-shield-check"></i> Стартиране на одит
         </button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Change Password Modal -->
+<!-- Модал за смяна на парола -->
 <div class="modal fade" id="changePasswordModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-key me-2 text-primary-color"></i>Change Password</h5>
+        <h5 class="modal-title"><i class="bi bi-key me-2 text-primary-color"></i>Смяна на парола</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="#">
+      <form method="POST" action="{{ url_for('main.change_password') }}">
         <div class="modal-body">
           <div class="mb-3">
-            <label class="form-label">Current Password</label>
+            <label class="form-label">Текуща парола</label>
             <div class="input-icon-wrap">
               <i class="bi bi-lock input-icon"></i>
-              <input type="password" name="current_password" class="form-control" placeholder="Enter current password" required />
+              <input type="password" name="current_password" class="form-control" placeholder="Въведете текущата парола" required />
             </div>
           </div>
           <div class="mb-3">
-            <label class="form-label">New Password</label>
+            <label class="form-label">Нова парола</label>
             <div class="input-icon-wrap">
               <i class="bi bi-lock-fill input-icon"></i>
-              <input type="password" name="new_password" class="form-control" placeholder="Min. 8 characters" required />
+              <input type="password" name="new_password" class="form-control" placeholder="Мин. 8 символа" required />
             </div>
           </div>
           <div class="mb-3">
-            <label class="form-label">Confirm New Password</label>
+            <label class="form-label">Потвърдете новата парола</label>
             <div class="input-icon-wrap">
               <i class="bi bi-lock-fill input-icon"></i>
-              <input type="password" name="confirm_password" class="form-control" placeholder="Repeat new password" required />
+              <input type="password" name="confirm_password" class="form-control" placeholder="Повторете новата парола" required />
             </div>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Update Password</button>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отказ</button>
+          <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Актуализирай паролата</button>
         </div>
       </form>
     </div>
   </div>
 </div>
 
-<!-- Deactivate Modal -->
+<!-- Модал за деактивиране -->
 <div class="modal fade" id="deactivateModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-sm">
     <div class="modal-content">
@@ -252,14 +252,14 @@
         <div style="width:60px;height:60px;border-radius:50%;background:var(--danger-light);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:26px;color:var(--danger);">
           <i class="bi bi-exclamation-triangle-fill"></i>
         </div>
-        <h5 style="font-size:17px;font-weight:700;margin-bottom:8px;color:var(--danger);">Account Deactivation</h5>
+        <h5 style="font-size:17px;font-weight:700;margin-bottom:8px;color:var(--danger);">Деактивиране на акаунт</h5>
         <p style="font-size:13.5px;color:var(--text-secondary);margin:0 0 20px;">
-          <strong>Warning!</strong> Deactivating your account is permanent and will remove all your data. This action cannot be undone.
+          <strong>Внимание!</strong> Деактивирането е постоянно и ще изтрие всички данни. Това действие не може да бъде отменено.
         </p>
         <div style="display:flex;gap:10px;justify-content:center;">
-          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-          <form method="POST" action="#">
-            <button type="submit" class="btn btn-danger"><i class="bi bi-person-x"></i> Confirm Deactivation</button>
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Отказ</button>
+          <form method="POST" action="{{ url_for('main.deactivate_account') }}">
+            <button type="submit" class="btn btn-danger"><i class="bi bi-person-x"></i> Потвърди деактивирането</button>
           </form>
         </div>
       </div>
@@ -272,8 +272,7 @@
 {% block scripts %}
 <script>
 function saveSetting(el) {
-  // Placeholder for AJAX save
-  console.log('Setting changed:', el.name, el.checked);
+  console.log('Настройката е променена:', el.name, el.checked);
 }
 </script>
 {% endblock %}

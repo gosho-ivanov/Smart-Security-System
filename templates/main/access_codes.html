@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% block title %}Access Codes — Smart Security System{% endblock %}
-{% block page_title %}Access Codes{% endblock %}
-{% block page_subtitle %}Manage PIN codes and keypad access{% endblock %}
+{% block title %}Кодове за достъп — Умна система за сигурност{% endblock %}
+{% block page_title %}Кодове за достъп{% endblock %}
+{% block page_subtitle %}Управление на PIN кодове и достъп чрез клавиатура{% endblock %}
 
 {% block content %}
 
@@ -9,26 +9,26 @@
   <div class="d-flex gap-2 flex-wrap">
     <div class="search-bar">
       <i class="bi bi-search"></i>
-      <input type="text" class="form-control" placeholder="Search codes…" id="pinSearch" />
+      <input type="text" class="form-control" placeholder="Търсене на кодове…" id="pinSearch" />
     </div>
     <select class="form-select" style="width:auto;font-size:13.5px;height:36px;padding-top:0;padding-bottom:0;">
-      <option value="">All Statuses</option>
-      <option>Active</option>
-      <option>Inactive</option>
+      <option value="">Всички статуси</option>
+      <option>Активен</option>
+      <option>Неактивен</option>
     </select>
   </div>
   <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addPinModal">
-    <i class="bi bi-plus-lg"></i> Add PIN Code
+    <i class="bi bi-plus-lg"></i> Добавяне на PIN код
   </button>
 </div>
 
-<!-- PIN Table -->
+<!-- Таблица с PIN кодове -->
 <div class="card">
   <div class="card-header">
     <i class="bi bi-grid-3x3-gap text-primary-color"></i>
-    <h5>PIN Codes</h5>
+    <h5>PIN кодове</h5>
     <div class="card-header-actions">
-      <span style="font-size:12.5px;color:var(--text-muted);">3 codes registered</span>
+      <span style="font-size:12.5px;color:var(--text-muted);">{{ pins|length }} регистрирани кода</span>
     </div>
   </div>
   <div class="card-body" style="padding:0;">
@@ -36,55 +36,65 @@
       <table class="data-table" id="pinTable">
         <thead>
           <tr>
-            <th>Assigned User</th>
-            <th>Door Access</th>
-            <th>Status</th>
-            <th>Expiration</th>
-            <th>Actions</th>
+            <th>Потребител</th>
+            <th>Достъп до врати</th>
+            <th>Статус</th>
+            <th>Изтичане</th>
+            <th>Действия</th>
           </tr>
         </thead>
         <tbody>
-          {% for pin in [
-            {'user': 'John Doe',  'initials': 'JD', 'doors': ['Main Entrance', 'Back Door'], 'status': 'Active',   'expiry': 'Dec 31, 2024'},
-            {'user': 'Jane Smith','initials': 'JS', 'doors': ['Main Entrance'],               'status': 'Active',   'expiry': 'Jun 15, 2025'},
-            {'user': 'Guest 1',   'initials': 'G1', 'doors': ['Back Door'],                  'status': 'Inactive', 'expiry': 'Nov 1, 2023'},
-          ] %}
-          <tr class="pin-row" data-user="{{ pin.user|lower }}">
+          {% for pin in pins %}
+          <tr class="pin-row" data-user="{{ pin.user.name|lower }}">
             <td>
               <div style="display:flex;align-items:center;gap:10px;">
-                <div class="user-avatar" style="width:32px;height:32px;font-size:11px;">{{ pin.initials }}</div>
-                <span style="font-weight:600;">{{ pin.user }}</span>
+                <div class="user-avatar" style="width:32px;height:32px;font-size:11px;">{{ pin.user.initials }}</div>
+                <span style="font-weight:600;">{{ pin.user.name }}</span>
               </div>
             </td>
             <td>
-              {% for door in pin.doors %}
+              {% for link in pin.doors %}
                 <span class="method-pill method-pin" style="margin-bottom:2px;">
-                  <i class="bi bi-door-open" style="font-size:10px;"></i> {{ door }}
+                  <i class="bi bi-door-open" style="font-size:10px;"></i> {{ link.door.name }}
                 </span>
+              {% else %}
+                <span style="font-size:12px;color:var(--text-muted);">Без врати</span>
               {% endfor %}
             </td>
             <td>
-              <span class="badge-pill {{ 'badge-active' if pin.status == 'Active' else 'badge-inactive' }}">
-                {{ pin.status }}
+              <span class="badge-pill {{ 'badge-active' if pin.is_active else 'badge-inactive' }}">
+                {{ 'Активен' if pin.is_active else 'Неактивен' }}
               </span>
             </td>
             <td style="font-size:13px;color:var(--text-secondary);">
-              <i class="bi bi-calendar3" style="font-size:11px;margin-right:4px;"></i>{{ pin.expiry }}
+              <i class="bi bi-calendar3" style="font-size:11px;margin-right:4px;"></i>
+              {{ pin.expires_at.strftime('%-d %b %Y') if pin.expires_at else 'Без ограничение' }}
             </td>
             <td>
               <div class="d-flex gap-2">
-                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editPinModal">
-                  <i class="bi bi-pencil"></i> Edit
+                <button class="btn btn-outline-primary btn-sm"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editPinModal"
+                        data-pin-id="{{ pin.id }}"
+                        data-pin-expiry="{{ pin.expires_at.strftime('%Y-%m-%d') if pin.expires_at else '' }}">
+                  <i class="bi bi-pencil"></i> Редакция
                 </button>
-                <button class="btn btn-sm {{ 'btn-outline-danger' if pin.status == 'Active' else 'btn-outline-success' }}"
-                        data-bs-toggle="modal" data-bs-target="#disablePinModal">
-                  {% if pin.status == 'Active' %}
-                    <i class="bi bi-slash-circle"></i> Disable
-                  {% else %}
-                    <i class="bi bi-check-circle"></i> Enable
-                  {% endif %}
-                </button>
+                <form method="POST" action="{{ url_for('main.toggle_pin', pin_id=pin.id) }}" style="display:inline;">
+                  <button type="submit" class="btn btn-sm {{ 'btn-outline-danger' if pin.is_active else 'btn-outline-success' }}">
+                    {% if pin.is_active %}
+                      <i class="bi bi-slash-circle"></i> Деактивирай
+                    {% else %}
+                      <i class="bi bi-check-circle"></i> Активирай
+                    {% endif %}
+                  </button>
+                </form>
               </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted);">
+              Няма регистрирани PIN кодове.
             </td>
           </tr>
           {% endfor %}
@@ -94,20 +104,20 @@
   </div>
 </div>
 
-<!-- ── ADD PIN MODAL ── -->
+<!-- ── МОДАЛ ЗА ДОБАВЯНЕ НА PIN ── -->
 <div class="modal fade" id="addPinModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-plus-circle me-2 text-primary-color"></i>Add PIN Code</h5>
+        <h5 class="modal-title"><i class="bi bi-plus-circle me-2 text-primary-color"></i>Добавяне на PIN код</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="#">
+      <form method="POST" action="{{ url_for('main.add_pin') }}">
         <div class="modal-body">
 
-          <!-- PIN Display -->
+          <!-- Дисплей за PIN -->
           <div class="mb-3 text-center">
-            <label class="form-label d-block mb-3">PIN Code</label>
+            <label class="form-label d-block mb-3">PIN код</label>
             <div class="pin-display" id="pinDots">
               {% for i in range(6) %}
               <div class="pin-dot" id="dot{{ i }}"></div>
@@ -133,53 +143,53 @@
           <div class="divider"></div>
 
           <div class="mb-3">
-            <label class="form-label">Assigned User</label>
+            <label class="form-label">Потребител</label>
             <select name="user_id" class="form-select" required>
-              <option value="" disabled selected>Select a user…</option>
-              <option>John Doe</option>
-              <option>Jane Smith</option>
-              <option>Peter Jones</option>
+              <option value="" disabled selected>Изберете потребител…</option>
+              {% for user in users %}
+              <option value="{{ user.id }}">{{ user.name }}</option>
+              {% endfor %}
             </select>
           </div>
 
           <div class="mb-3">
-            <label class="form-label">Allowed Doors</label>
+            <label class="form-label">Разрешени врати</label>
             <div style="display:flex;flex-direction:column;gap:8px;padding:12px;background:var(--body-bg);border-radius:var(--radius-sm);border:1px solid var(--border);">
-              {% for door in ['Main Entrance', 'Back Door', 'Garage Door', 'Side Gate'] %}
+              {% for door in doors %}
               <div class="d-flex align-items-center gap-2">
-                <input type="checkbox" class="form-check-input" id="door_{{ loop.index }}" name="doors" value="{{ door }}" />
-                <label for="door_{{ loop.index }}" class="form-label mb-0" style="cursor:pointer;font-size:13.5px;">{{ door }}</label>
+                <input type="checkbox" class="form-check-input" id="door_{{ door.id }}" name="doors" value="{{ door.id }}" />
+                <label for="door_{{ door.id }}" class="form-label mb-0" style="cursor:pointer;font-size:13.5px;">{{ door.name }}</label>
               </div>
               {% endfor %}
             </div>
           </div>
 
           <div class="mb-3">
-            <label class="form-label">Expiration Date</label>
+            <label class="form-label">Дата на изтичане</label>
             <input type="date" name="expiry" class="form-control" />
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save PIN Code</button>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отказ</button>
+          <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Запазване на PIN</button>
         </div>
       </form>
     </div>
   </div>
 </div>
 
-<!-- ── EDIT PIN MODAL ── -->
+<!-- ── МОДАЛ ЗА РЕДАКЦИЯ НА PIN ── -->
 <div class="modal fade" id="editPinModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-pencil me-2 text-primary-color"></i>Edit PIN Code</h5>
+        <h5 class="modal-title"><i class="bi bi-pencil me-2 text-primary-color"></i>Редакция на PIN код</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="#">
+      <form method="POST" action="" id="editPinForm">
         <div class="modal-body">
           <div class="mb-3 text-center">
-            <label class="form-label d-block mb-3">New PIN Code</label>
+            <label class="form-label d-block mb-3">Нов PIN код</label>
             <div class="pin-display" id="editPinDots">
               {% for i in range(6) %}
               <div class="pin-dot" id="editDot{{ i }}"></div>
@@ -203,52 +213,26 @@
           </div>
           <div class="divider"></div>
           <div class="mb-3">
-            <label class="form-label">Allowed Doors</label>
+            <label class="form-label">Разрешени врати</label>
             <div style="display:flex;flex-direction:column;gap:8px;padding:12px;background:var(--body-bg);border-radius:var(--radius-sm);border:1px solid var(--border);">
-              {% for door in ['Main Entrance', 'Back Door', 'Garage Door', 'Side Gate'] %}
+              {% for door in doors %}
               <div class="d-flex align-items-center gap-2">
-                <input type="checkbox" class="form-check-input" id="edit_door_{{ loop.index }}" name="doors" value="{{ door }}" {% if loop.index <= 2 %}checked{% endif %} />
-                <label for="edit_door_{{ loop.index }}" class="form-label mb-0" style="cursor:pointer;font-size:13.5px;">{{ door }}</label>
+                <input type="checkbox" class="form-check-input" id="edit_door_{{ door.id }}" name="doors" value="{{ door.id }}" />
+                <label for="edit_door_{{ door.id }}" class="form-label mb-0" style="cursor:pointer;font-size:13.5px;">{{ door.name }}</label>
               </div>
               {% endfor %}
             </div>
           </div>
           <div class="mb-3">
-            <label class="form-label">Expiration Date</label>
-            <input type="date" name="expiry" class="form-control" value="2024-12-31" />
+            <label class="form-label">Дата на изтичане</label>
+            <input type="date" name="expiry" id="editPinExpiry" class="form-control" />
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save Changes</button>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отказ</button>
+          <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Запазване на промените</button>
         </div>
       </form>
-    </div>
-  </div>
-</div>
-
-<!-- ── DISABLE PIN MODAL ── -->
-<div class="modal fade" id="disablePinModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered modal-sm">
-    <div class="modal-content">
-      <div class="modal-header" style="border-bottom:none;padding-bottom:0;">
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body text-center" style="padding:24px 28px;">
-        <div style="width:56px;height:56px;border-radius:50%;background:var(--danger-light);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:24px;color:var(--danger);">
-          <i class="bi bi-slash-circle"></i>
-        </div>
-        <h5 style="font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:8px;">Disable PIN Code?</h5>
-        <p style="font-size:13.5px;color:var(--text-secondary);margin-bottom:0;">
-          This PIN code will be deactivated immediately. The assigned user will lose door access. You can re-enable it at any time.
-        </p>
-      </div>
-      <div class="modal-footer" style="justify-content:center;gap:10px;padding-top:0;">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-        <form method="POST" action="#" style="display:inline;">
-          <button type="submit" class="btn btn-danger"><i class="bi bi-slash-circle"></i> Disable</button>
-        </form>
-      </div>
     </div>
   </div>
 </div>
@@ -257,7 +241,7 @@
 
 {% block scripts %}
 <script>
-// Add PIN pad logic
+// PIN pad — добавяне
 let pinVal = '';
 function addPin(k) {
   if (pinVal.length >= 6) return;
@@ -273,7 +257,7 @@ function clearPin() {
   updateDots('pinDots', pinVal, 'pinValue');
 }
 
-// Edit PIN pad logic
+// PIN pad — редакция
 let editPinVal = '';
 function addEditPin(k) {
   if (editPinVal.length >= 6) return;
@@ -298,7 +282,18 @@ function updateDots(dotsContainerId, val, inputId) {
   document.getElementById(inputId).value = val;
 }
 
-// Search
+// Задаване на action на формата за редакция от data атрибута на бутона
+document.getElementById('editPinModal').addEventListener('show.bs.modal', function(event) {
+  const btn = event.relatedTarget;
+  const pinId = btn.getAttribute('data-pin-id');
+  const expiry = btn.getAttribute('data-pin-expiry');
+  document.getElementById('editPinForm').action = '/access-codes/' + pinId + '/edit';
+  document.getElementById('editPinExpiry').value = expiry || '';
+  editPinVal = '';
+  updateDots('editPinDots', '', 'editPinValue');
+});
+
+// Търсене
 document.getElementById('pinSearch').addEventListener('input', function() {
   const q = this.value.toLowerCase();
   document.querySelectorAll('.pin-row').forEach(row => {

@@ -8,7 +8,7 @@ from ..models import User
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
-# ── Sign Up ───────────────────────────────────────────────
+# ── Регистрация ───────────────────────────────────────────
 @auth_bp.route('/signup', methods=['GET', 'POST'])
 def signup():
     if current_user.is_authenticated:
@@ -21,25 +21,24 @@ def signup():
         password         = request.form.get('password', '')
         confirm_password = request.form.get('confirm_password', '')
 
-        # Validation
         if not all([name, username, email, password]):
-            flash('All fields are required.', 'danger')
+            flash('Всички полета са задължителни.', 'danger')
             return render_template('auth/signup.html')
 
         if password != confirm_password:
-            flash('Passwords do not match.', 'danger')
+            flash('Паролите не съвпадат.', 'danger')
             return render_template('auth/signup.html')
 
         if len(password) < 8:
-            flash('Password must be at least 8 characters long.', 'danger')
+            flash('Паролата трябва да е поне 8 символа.', 'danger')
             return render_template('auth/signup.html')
 
         if User.query.filter_by(email=email).first():
-            flash('An account with that email already exists.', 'danger')
+            flash('Вече съществува акаунт с този имейл.', 'danger')
             return render_template('auth/signup.html')
 
         if User.query.filter_by(username=username).first():
-            flash('That username is already taken.', 'danger')
+            flash('Това потребителско име вече е заето.', 'danger')
             return render_template('auth/signup.html')
 
         user = User(name=name, username=username, email=email, role='user')
@@ -47,13 +46,13 @@ def signup():
         db.session.add(user)
         db.session.commit()
 
-        flash('Account created! You can now log in.', 'success')
+        flash('Акаунтът е създаден! Можете да влезете.', 'success')
         return redirect(url_for('auth.login'))
 
     return render_template('auth/signup.html')
 
 
-# ── Log In ────────────────────────────────────────────────
+# ── Вход ──────────────────────────────────────────────────
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -67,11 +66,11 @@ def login():
         user = User.query.filter_by(email=email).first()
 
         if not user or not user.check_password(password):
-            flash('Invalid email or password.', 'danger')
+            flash('Невалиден имейл или парола.', 'danger')
             return render_template('auth/login.html')
 
         if not user.is_active:
-            flash('This account has been deactivated.', 'danger')
+            flash('Този акаунт е деактивиран.', 'danger')
             return render_template('auth/login.html')
 
         user.last_login = datetime.utcnow()
@@ -84,29 +83,29 @@ def login():
     return render_template('auth/login.html')
 
 
-# ── Log Out ───────────────────────────────────────────────
+# ── Изход ─────────────────────────────────────────────────
 @auth_bp.route('/logout')
 @login_required
 def logout():
     logout_user()
-    flash('You have been logged out.', 'success')
+    flash('Излязохте от системата.', 'success')
     return redirect(url_for('auth.login'))
 
 
-# ── Forgot Password ───────────────────────────────────────
+# ── Забравена парола ──────────────────────────────────────
 @auth_bp.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
         user  = User.query.filter_by(email=email).first()
-        # Always show success to prevent email enumeration
-        flash('If that email is registered, a reset link has been sent.', 'success')
+        # Винаги показваме успех, за да предотвратим изброяване на имейли
+        flash('Ако имейлът е регистриран, ще получите линк за нулиране.', 'success')
         return redirect(url_for('auth.login'))
 
     return render_template('auth/reset_password.html')
 
 
-# ── Reset Password ────────────────────────────────────────
+# ── Нулиране на парола ────────────────────────────────────
 @auth_bp.route('/reset-password', methods=['GET', 'POST'])
 def reset_password():
     if request.method == 'POST':
@@ -114,15 +113,15 @@ def reset_password():
         confirm_password = request.form.get('confirm_password', '')
 
         if new_password != confirm_password:
-            flash('Passwords do not match.', 'danger')
+            flash('Паролите не съвпадат.', 'danger')
             return render_template('auth/reset_password.html')
 
         if len(new_password) < 8:
-            flash('Password must be at least 8 characters long.', 'danger')
+            flash('Паролата трябва да е поне 8 символа.', 'danger')
             return render_template('auth/reset_password.html')
 
-        # In production: validate token, find user, update password
-        flash('Password updated successfully. Please log in.', 'success')
+        # В продукция: валидирайте токен, намерете потребител, актуализирайте паролата
+        flash('Паролата е актуализирана успешно. Моля, влезте.', 'success')
         return redirect(url_for('auth.login'))
 
     return render_template('auth/reset_password.html')

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% block title %}Allowed Personnel — Smart Security System{% endblock %}
-{% block page_title %}Allowed Personnel{% endblock %}
-{% block page_subtitle %}Manage who can access your secured zones{% endblock %}
+{% block title %}Разрешен персонал — Умна система за сигурност{% endblock %}
+{% block page_title %}Разрешен персонал{% endblock %}
+{% block page_subtitle %}Управлявайте кой може да достъпва защитените зони{% endblock %}
 
 {% block content %}
 
@@ -9,25 +9,25 @@
   <div class="d-flex gap-2 flex-wrap">
     <div class="search-bar">
       <i class="bi bi-search"></i>
-      <input type="text" class="form-control" placeholder="Search personnel…" id="personnelSearch" />
+      <input type="text" class="form-control" placeholder="Търсене на персонал…" id="personnelSearch" />
     </div>
     <select class="form-select" style="width:auto;font-size:13.5px;height:36px;padding-top:0;padding-bottom:0;" id="statusFilter">
-      <option value="">All Statuses</option>
-      <option>Active</option>
-      <option>Inactive</option>
+      <option value="">Всички статуси</option>
+      <option value="active">Активен</option>
+      <option value="inactive">Неактивен</option>
     </select>
   </div>
   <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addPersonnelModal">
-    <i class="bi bi-person-plus"></i> Add Person
+    <i class="bi bi-person-plus"></i> Добавяне на лице
   </button>
 </div>
 
 <div class="card">
   <div class="card-header">
     <i class="bi bi-people text-primary-color"></i>
-    <h5>Registered Personnel</h5>
+    <h5>Регистриран персонал</h5>
     <div class="card-header-actions">
-      <span style="font-size:12.5px;color:var(--text-muted);">3 registered</span>
+      <span style="font-size:12.5px;color:var(--text-muted);">{{ users|length }} регистрирани</span>
     </div>
   </div>
   <div class="card-body" style="padding:0;">
@@ -35,58 +35,79 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Access Methods</th>
-            <th>Allowed Doors</th>
-            <th>Status</th>
-            <th>Actions</th>
+            <th>Име</th>
+            <th>Методи за достъп</th>
+            <th>Разрешени врати</th>
+            <th>Статус</th>
+            <th>Действия</th>
           </tr>
         </thead>
         <tbody>
-          {% for person in [
-            {'name': 'John Doe',   'initials': 'JD', 'methods': ['PIN', 'Fingerprint'], 'doors': ['Main Entrance', 'Back Door'], 'status': 'Active'},
-            {'name': 'Jane Smith', 'initials': 'JS', 'methods': ['PIN'],                'doors': ['Main Entrance'],               'status': 'Active'},
-            {'name': 'Peter Jones','initials': 'PJ', 'methods': ['Fingerprint'],         'doors': ['Back Door'],                  'status': 'Inactive'},
-          ] %}
-          <tr class="personnel-row" data-name="{{ person.name|lower }}" data-status="{{ person.status|lower }}">
+          {% for user in users %}
+          <tr class="personnel-row"
+              data-name="{{ user.name|lower }}"
+              data-status="{{ 'active' if user.is_active else 'inactive' }}">
             <td>
               <div style="display:flex;align-items:center;gap:10px;">
-                <div class="user-avatar" style="width:36px;height:36px;font-size:12px;">{{ person.initials }}</div>
+                <div class="user-avatar" style="width:36px;height:36px;font-size:12px;">{{ user.initials }}</div>
                 <div>
-                  <div style="font-weight:600;font-size:14px;">{{ person.name }}</div>
-                  <div style="font-size:11.5px;color:var(--text-muted);">{{ person.methods|join(' · ') }}</div>
+                  <div style="font-weight:600;font-size:14px;">{{ user.name }}</div>
+                  <div style="font-size:11.5px;color:var(--text-muted);">{{ user.email }}</div>
                 </div>
               </div>
             </td>
             <td>
-              {% for method in person.methods %}
-                <span class="method-pill {{ 'method-pin' if method == 'PIN' else 'method-fp' }}">
-                  <i class="bi bi-{{ 'grid-3x3-gap' if method == 'PIN' else 'fingerprint' }}" style="font-size:10px;"></i>
-                  {{ method }}
+              {% if user.pin_codes %}
+                <span class="method-pill method-pin">
+                  <i class="bi bi-grid-3x3-gap" style="font-size:10px;"></i> PIN
                 </span>
-              {% endfor %}
+              {% endif %}
+              {% if user.fingerprints %}
+                <span class="method-pill method-fp">
+                  <i class="bi bi-fingerprint" style="font-size:10px;"></i> Отпечатък
+                </span>
+              {% endif %}
+              {% if not user.pin_codes and not user.fingerprints %}
+                <span style="font-size:12px;color:var(--text-muted);">—</span>
+              {% endif %}
             </td>
             <td>
-              {% for door in person.doors %}
-                <div style="font-size:12.5px;color:var(--text-secondary);display:flex;align-items:center;gap:4px;">
-                  <i class="bi bi-door-open" style="font-size:11px;color:var(--text-muted);"></i> {{ door }}
-                </div>
+              {% set door_names = [] %}
+              {% for pin in user.pin_codes %}
+                {% for link in pin.doors %}
+                  {% if link.door.name not in door_names %}
+                    {% set _ = door_names.append(link.door.name) %}
+                    <div style="font-size:12.5px;color:var(--text-secondary);display:flex;align-items:center;gap:4px;">
+                      <i class="bi bi-door-open" style="font-size:11px;color:var(--text-muted);"></i> {{ link.door.name }}
+                    </div>
+                  {% endif %}
+                {% endfor %}
               {% endfor %}
+              {% if not door_names %}
+                <span style="font-size:12px;color:var(--text-muted);">—</span>
+              {% endif %}
             </td>
             <td>
-              <span class="badge-pill {{ 'badge-active' if person.status == 'Active' else 'badge-inactive' }}">
-                {{ person.status }}
+              <span class="badge-pill {{ 'badge-active' if user.is_active else 'badge-inactive' }}">
+                {{ 'Активен' if user.is_active else 'Неактивен' }}
               </span>
             </td>
             <td>
               <div class="d-flex gap-2">
-                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editPersonnelModal">
-                  <i class="bi bi-pencil"></i> Edit
-                </button>
-                <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#removePersonnelModal">
-                  <i class="bi bi-person-x"></i> Remove
+                <button class="btn btn-outline-danger btn-sm"
+                        data-bs-toggle="modal"
+                        data-bs-target="#removePersonnelModal"
+                        data-user-id="{{ user.id }}"
+                        data-user-name="{{ user.name }}">
+                  <i class="bi bi-person-x"></i> Премахване
                 </button>
               </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted);">
+              Няма регистриран персонал.
             </td>
           </tr>
           {% endfor %}
@@ -96,68 +117,44 @@
   </div>
 </div>
 
-<!-- Add Personnel Modal -->
+<!-- Модал за добавяне на лице -->
 <div class="modal fade" id="addPersonnelModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-person-plus me-2 text-primary-color"></i>Add Person</h5>
+        <h5 class="modal-title"><i class="bi bi-person-plus me-2 text-primary-color"></i>Добавяне на лице</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="#">
+      <form method="POST" action="{{ url_for('main.add_personnel') }}">
         <div class="modal-body">
           <div class="row g-3 mb-3">
             <div class="col-6">
-              <label class="form-label">Full Name</label>
-              <input type="text" name="name" class="form-control" placeholder="John Doe" required />
+              <label class="form-label">Пълно име</label>
+              <input type="text" name="name" class="form-control" placeholder="Иван Иванов" required />
             </div>
             <div class="col-6">
-              <label class="form-label">Email</label>
-              <input type="email" name="email" class="form-control" placeholder="john@example.com" />
+              <label class="form-label">Имейл</label>
+              <input type="email" name="email" class="form-control" placeholder="ivan@пример.com" />
             </div>
           </div>
           <div class="mb-3">
-            <label class="form-label">Access Methods</label>
-            <div style="display:flex;gap:16px;padding:12px;background:var(--body-bg);border-radius:var(--radius-sm);border:1px solid var(--border);">
-              <div class="d-flex align-items-center gap-2">
-                <input type="checkbox" class="form-check-input" id="a_pin" name="method_pin" />
-                <label for="a_pin" class="form-label mb-0" style="cursor:pointer;"><i class="bi bi-grid-3x3-gap me-1"></i>PIN Code</label>
-              </div>
-              <div class="d-flex align-items-center gap-2">
-                <input type="checkbox" class="form-check-input" id="a_fp" name="method_fp" />
-                <label for="a_fp" class="form-label mb-0" style="cursor:pointer;"><i class="bi bi-fingerprint me-1"></i>Fingerprint</label>
-              </div>
-            </div>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Allowed Doors</label>
-            <div style="display:flex;flex-direction:column;gap:8px;padding:12px;background:var(--body-bg);border-radius:var(--radius-sm);border:1px solid var(--border);">
-              {% for door in ['Main Entrance', 'Back Door', 'Garage Door', 'Side Gate'] %}
-              <div class="d-flex align-items-center gap-2">
-                <input type="checkbox" class="form-check-input" id="adoor_{{ loop.index }}" name="doors" value="{{ door }}" />
-                <label for="adoor_{{ loop.index }}" class="form-label mb-0" style="cursor:pointer;font-size:13.5px;">{{ door }}</label>
-              </div>
-              {% endfor %}
-            </div>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Status</label>
+            <label class="form-label">Статус</label>
             <select name="status" class="form-select">
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value="active">Активен</option>
+              <option value="inactive">Неактивен</option>
             </select>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Add Person</button>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отказ</button>
+          <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Добавяне</button>
         </div>
       </form>
     </div>
   </div>
 </div>
 
-<!-- Remove Personnel Modal -->
+<!-- Модал за премахване на лице -->
 <div class="modal fade" id="removePersonnelModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-sm">
     <div class="modal-content">
@@ -165,12 +162,14 @@
         <div style="width:56px;height:56px;border-radius:50%;background:var(--danger-light);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:22px;color:var(--danger);">
           <i class="bi bi-person-x"></i>
         </div>
-        <h5 style="font-size:16px;font-weight:700;margin-bottom:8px;">Remove Person?</h5>
-        <p style="font-size:13.5px;color:var(--text-secondary);margin:0 0 20px;">This will revoke all access rights for this person immediately. Their PIN codes and fingerprint will also be deactivated.</p>
+        <h5 style="font-size:16px;font-weight:700;margin-bottom:8px;">Премахване на лице?</h5>
+        <p style="font-size:13.5px;color:var(--text-secondary);margin:0 0 20px;">
+          Това ще отнеме всички права за достъп на <strong id="removePersonnelName"></strong> незабавно. PIN кодовете и пръстовите отпечатъци ще бъдат деактивирани.
+        </p>
         <div style="display:flex;gap:10px;justify-content:center;">
-          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-          <form method="POST" action="#" style="display:inline;">
-            <button type="submit" class="btn btn-danger"><i class="bi bi-person-x"></i> Remove</button>
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Отказ</button>
+          <form id="removePersonnelForm" method="POST" action="" style="display:inline;">
+            <button type="submit" class="btn btn-danger"><i class="bi bi-person-x"></i> Премахни</button>
           </form>
         </div>
       </div>
@@ -193,5 +192,11 @@ function filterTable() {
 }
 document.getElementById('personnelSearch').addEventListener('input', filterTable);
 document.getElementById('statusFilter').addEventListener('change', filterTable);
+
+document.getElementById('removePersonnelModal').addEventListener('show.bs.modal', function(event) {
+  const btn = event.relatedTarget;
+  document.getElementById('removePersonnelName').textContent = btn.getAttribute('data-user-name');
+  document.getElementById('removePersonnelForm').action = '/personnel/' + btn.getAttribute('data-user-id') + '/remove';
+});
 </script>
 {% endblock %}

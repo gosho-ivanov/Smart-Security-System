@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bg">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}Smart Security System{% endblock %}</title>
+  <title>{% block title %}Умна система за сигурност{% endblock %}</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
@@ -11,7 +11,7 @@
 <body>
 <div class="app-layout">
 
-  <!-- ══ SIDEBAR ══ -->
+  <!-- ══ СТРАНИЧЕН ПАНЕЛ ══ -->
   <aside class="sidebar">
     <div class="sidebar-header">
       <div class="sidebar-logo">
@@ -19,105 +19,105 @@
       </div>
       <div class="sidebar-brand-text">
         <span class="brand-name">SecureGuard</span>
-        <span class="brand-sub">Security System</span>
+        <span class="brand-sub">Система за сигурност</span>
       </div>
     </div>
 
     <nav class="sidebar-nav">
-      <span class="nav-section-label">Overview</span>
+      <span class="nav-section-label">Преглед</span>
       <div class="nav-item">
         <a href="{{ url_for('main.dashboard') }}" class="nav-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}">
           <span class="nav-icon"><i class="bi bi-grid-1x2"></i></span>
-          Dashboard
+          Табло
         </a>
       </div>
 
-      <span class="nav-section-label">Monitoring</span>
+      <span class="nav-section-label">Наблюдение</span>
       <div class="nav-item">
         <a href="{{ url_for('main.cameras') }}" class="nav-link {% if request.endpoint == 'main.cameras' %}active{% endif %}">
           <span class="nav-icon"><i class="bi bi-camera-video"></i></span>
-          Cameras
+          Камери
         </a>
       </div>
       <div class="nav-item">
         <a href="{{ url_for('main.doors') }}" class="nav-link {% if request.endpoint == 'main.doors' %}active{% endif %}">
           <span class="nav-icon"><i class="bi bi-door-open"></i></span>
-          Doors
+          Врати
         </a>
       </div>
 
-      <span class="nav-section-label">Access Control</span>
+      <span class="nav-section-label">Контрол на достъп</span>
       <div class="nav-item">
         <a href="{{ url_for('main.access_codes') }}" class="nav-link {% if request.endpoint == 'main.access_codes' %}active{% endif %}">
           <span class="nav-icon"><i class="bi bi-grid-3x3-gap"></i></span>
-          Access Codes
+          Кодове за достъп
         </a>
       </div>
       <div class="nav-item">
         <a href="{{ url_for('main.fingerprints') }}" class="nav-link {% if request.endpoint == 'main.fingerprints' %}active{% endif %}">
           <span class="nav-icon"><i class="bi bi-fingerprint"></i></span>
-          Fingerprints
+          Отпечатъци
         </a>
       </div>
       <div class="nav-item">
         <a href="{{ url_for('main.personnel') }}" class="nav-link {% if request.endpoint == 'main.personnel' %}active{% endif %}">
           <span class="nav-icon"><i class="bi bi-people"></i></span>
-          Allowed Personnel
+          Разрешен персонал
         </a>
       </div>
 
-      <span class="nav-section-label">Account</span>
+      <span class="nav-section-label">Акаунт</span>
       <div class="nav-item">
         <a href="{{ url_for('main.profile') }}" class="nav-link {% if request.endpoint == 'main.profile' %}active{% endif %}">
           <span class="nav-icon"><i class="bi bi-person-circle"></i></span>
-          Profile
+          Профил
         </a>
       </div>
       <div class="nav-item">
         <a href="{{ url_for('main.settings') }}" class="nav-link {% if request.endpoint == 'main.settings' %}active{% endif %}">
           <span class="nav-icon"><i class="bi bi-gear"></i></span>
-          Settings
+          Настройки
         </a>
       </div>
     </nav>
 
     <div class="sidebar-footer">
       <div class="sidebar-user">
-        <div class="user-avatar">JD</div>
+        <div class="user-avatar">{{ current_user.initials }}</div>
         <div class="user-info">
-          <div class="user-name">John Doe</div>
-          <div class="user-role">Administrator</div>
+          <div class="user-name">{{ current_user.name }}</div>
+          <div class="user-role">{{ 'Администратор' if current_user.role == 'administrator' else 'Потребител' }}</div>
         </div>
-        <a href="{{ url_for('auth.logout') }}" title="Log out">
+        <a href="{{ url_for('auth.logout') }}" title="Изход">
           <i class="bi bi-box-arrow-right" style="color:var(--sidebar-text);font-size:15px;"></i>
         </a>
       </div>
     </div>
   </aside>
 
-  <!-- ══ MAIN ══ -->
+  <!-- ══ ОСНОВНО СЪДЪРЖАНИЕ ══ -->
   <div class="main-content">
-    <!-- Topbar -->
+    <!-- Горна лента -->
     <header class="topbar">
       <div class="topbar-title">
-        <h2>{% block page_title %}Dashboard{% endblock %}</h2>
+        <h2>{% block page_title %}Табло{% endblock %}</h2>
         <p>{% block page_subtitle %}{% endblock %}</p>
       </div>
       <div class="topbar-actions">
-        <button class="topbar-icon-btn" title="Notifications">
+        <button class="topbar-icon-btn" title="Известия">
           <i class="bi bi-bell"></i>
           <span class="notif-dot"></span>
         </button>
         <div class="topbar-divider"></div>
         <a href="{{ url_for('main.profile') }}" style="display:flex;align-items:center;gap:9px;text-decoration:none;">
-          <div class="user-avatar" style="width:34px;height:34px;font-size:13px;">JD</div>
-          <span style="font-size:13.5px;font-weight:600;color:var(--text-primary);">John Doe</span>
+          <div class="user-avatar" style="width:34px;height:34px;font-size:13px;">{{ current_user.initials }}</div>
+          <span style="font-size:13.5px;font-weight:600;color:var(--text-primary);">{{ current_user.name }}</span>
           <i class="bi bi-chevron-down" style="font-size:11px;color:var(--text-muted);"></i>
         </a>
       </div>
     </header>
 
-    <!-- Flash Messages -->
+    <!-- Флаш съобщения -->
     <div class="px-4 pt-3">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -131,7 +131,7 @@
       {% endwith %}
     </div>
 
-    <!-- Page Content -->
+    <!-- Съдържание на страницата -->
     <main class="page-content">
       {% block content %}{% endblock %}
     </main>

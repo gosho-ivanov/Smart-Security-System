@@ -1,90 +1,90 @@
 {% extends "base.html" %}
-{% block title %}Cameras — Smart Security System{% endblock %}
-{% block page_title %}Cameras{% endblock %}
-{% block page_subtitle %}Live feed monitoring across all zones{% endblock %}
+{% block title %}Камери — Умна система за сигурност{% endblock %}
+{% block page_title %}Камери{% endblock %}
+{% block page_subtitle %}Мониторинг на живо по всички зони{% endblock %}
 
 {% block content %}
 
-<!-- Top Controls -->
+<!-- Горни контроли -->
 <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
   <div class="d-flex align-items-center gap-3">
     <div class="search-bar">
       <i class="bi bi-search"></i>
-      <input type="text" class="form-control" placeholder="Search cameras…" id="cameraSearch" />
+      <input type="text" class="form-control" placeholder="Търсене на камери…" id="cameraSearch" />
     </div>
     <select class="form-select" style="width:auto;font-size:13.5px;height:36px;padding-top:0;padding-bottom:0;">
-      <option>All Zones</option>
-      <option>Front</option>
-      <option>Rear</option>
-      <option>Interior</option>
-      <option>Garage</option>
+      <option>Всички зони</option>
+      <option>Предна</option>
+      <option>Задна</option>
+      <option>Вътрешна</option>
+      <option>Гараж</option>
     </select>
   </div>
   <div class="d-flex gap-2">
-    <button class="btn btn-outline-secondary btn-sm" id="gridViewBtn" title="Grid View">
+    <button class="btn btn-outline-secondary btn-sm" id="gridViewBtn" title="Мрежов изглед">
       <i class="bi bi-grid-3x3"></i>
     </button>
-    <button class="btn btn-outline-secondary btn-sm" id="listViewBtn" title="List View">
+    <button class="btn btn-outline-secondary btn-sm" id="listViewBtn" title="Списъчен изглед">
       <i class="bi bi-list-ul"></i>
     </button>
     <button class="btn btn-primary btn-sm">
-      <i class="bi bi-plus-lg"></i> Add Camera
+      <i class="bi bi-plus-lg"></i> Добавяне на камера
     </button>
   </div>
 </div>
 
-<!-- Status Bar -->
+<!-- Лента за статус -->
 <div class="d-flex gap-3 mb-4 flex-wrap">
   <div style="display:flex;align-items:center;gap:7px;font-size:13px;">
     <span style="width:8px;height:8px;border-radius:50%;background:var(--success);display:inline-block;"></span>
-    <span style="color:var(--text-secondary);"><strong style="color:var(--text-primary);">3</strong> Online</span>
+    <span style="color:var(--text-secondary);"><strong style="color:var(--text-primary);">3</strong> Онлайн</span>
   </div>
   <div style="display:flex;align-items:center;gap:7px;font-size:13px;">
     <span style="width:8px;height:8px;border-radius:50%;background:var(--danger);display:inline-block;"></span>
-    <span style="color:var(--text-secondary);"><strong style="color:var(--text-primary);">1</strong> Offline</span>
+    <span style="color:var(--text-secondary);"><strong style="color:var(--text-primary);">1</strong> Офлайн</span>
   </div>
   <div style="display:flex;align-items:center;gap:7px;font-size:13px;">
     <span style="width:8px;height:8px;border-radius:50%;background:var(--warning);display:inline-block;"></span>
-    <span style="color:var(--text-secondary);"><strong style="color:var(--text-primary);">0</strong> Recording</span>
+    <span style="color:var(--text-secondary);"><strong style="color:var(--text-primary);">0</strong> Записват</span>
   </div>
 </div>
 
-<!-- Camera Grid -->
+<!-- Мрежа с камери -->
 <div class="row g-3" id="cameraGrid">
 
   {% for cam in [
-    {'id': 1, 'name': 'Front Door Camera',   'zone': 'Front',    'status': 'online',  'resolution': '1080p', 'fps': '30'},
-    {'id': 2, 'name': 'Backyard Camera',     'zone': 'Rear',     'status': 'online',  'resolution': '1080p', 'fps': '30'},
-    {'id': 3, 'name': 'Living Room Camera',  'zone': 'Interior', 'status': 'offline', 'resolution': '720p',  'fps': '—'},
-    {'id': 4, 'name': 'Garage Camera',       'zone': 'Garage',   'status': 'online',  'resolution': '1080p', 'fps': '25'},
+    {'id': 1, 'name': 'Камера входна врата',  'zone': 'Предна',    'status': 'online',  'resolution': '1080p', 'fps': '30'},
+    {'id': 2, 'name': 'Камера задна страна',  'zone': 'Задна',     'status': 'online',  'resolution': '1080p', 'fps': '30'},
+    {'id': 3, 'name': 'Камера дневна',        'zone': 'Вътрешна',  'status': 'offline', 'resolution': '720p',  'fps': '—'},
+    {'id': 4, 'name': 'Камера гараж',         'zone': 'Гараж',     'status': 'online',  'resolution': '1080p', 'fps': '25'},
   ] %}
   <div class="col-md-6 col-xl-6 camera-card-col" data-name="{{ cam.name|lower }}" data-zone="{{ cam.zone }}">
     <div class="card overflow-hidden">
-      <!-- Feed -->
+      <!-- Изображение -->
       <div class="camera-feed" style="border-radius:0;border:none;border-bottom:1px solid var(--border);">
         {% if cam.status == 'offline' %}
         <div class="cam-placeholder">
           <i class="bi bi-camera-video-off" style="color:#334155;font-size:40px;"></i>
-          <span style="color:#334155;font-size:11px;font-weight:700;letter-spacing:.1em;">CAMERA OFFLINE</span>
+          <span style="color:#334155;font-size:11px;font-weight:700;letter-spacing:.1em;">КАМЕРАТА Е ОФЛАЙН</span>
         </div>
         {% else %}
         <div class="cam-placeholder">
           <i class="bi bi-camera-video" style="color:#1E293B;font-size:40px;"></i>
-          <span style="color:#1E293B;font-size:11px;font-weight:700;letter-spacing:.1em;">LIVE FEED</span>
+          <span style="color:#1E293B;font-size:11px;font-weight:700;letter-spacing:.1em;">НА ЖИВО</span>
         </div>
         {% endif %}
         <div class="cam-overlay-top">
-          <button class="cam-action-btn" title="Fullscreen"><i class="bi bi-fullscreen"></i></button>
-          <button class="cam-action-btn" title="Snapshot"><i class="bi bi-camera"></i></button>
-          <button class="cam-action-btn" title="Settings"><i class="bi bi-gear"></i></button>
+          <button class="cam-action-btn" title="Цял екран"><i class="bi bi-fullscreen"></i></button>
+          <button class="cam-action-btn" title="Снимка"><i class="bi bi-camera"></i></button>
+          <button class="cam-action-btn" title="Настройки"><i class="bi bi-gear"></i></button>
         </div>
         <div class="cam-label">
           <span class="cam-status-dot {{ cam.status }}"></span>
-          CAM {{ cam.id }} · {{ cam.resolution }}
+          КАМ {{ cam.id }} · {{ cam.resolution }}
         </div>
       </div>
 
-      <!-- Info -->
+      <!-- Информация -->
       <div class="card-body" style="padding:14px 18px;">
         <div class="d-flex align-items-center justify-content-between">
           <div>
@@ -93,22 +93,22 @@
             </div>
             <div style="font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:10px;">
               <span><i class="bi bi-geo-alt" style="font-size:11px;"></i> {{ cam.zone }}</span>
-              <span><i class="bi bi-film" style="font-size:11px;"></i> {{ cam.fps }} fps</span>
+              <span><i class="bi bi-film" style="font-size:11px;"></i> {{ cam.fps }} кадъра/сек</span>
             </div>
           </div>
           <div class="d-flex align-items-center gap-2">
             <span class="badge-pill {{ 'badge-active' if cam.status == 'online' else 'badge-inactive' }}">
-              {{ cam.status|capitalize }}
+              {{ 'Онлайн' if cam.status == 'online' else 'Офлайн' }}
             </span>
             <div class="dropdown">
               <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="dropdown">
                 <i class="bi bi-three-dots-vertical"></i>
               </button>
               <ul class="dropdown-menu dropdown-menu-end" style="font-size:13px;">
-                <li><a class="dropdown-item" href="#"><i class="bi bi-pencil me-2"></i>Rename</a></li>
-                <li><a class="dropdown-item" href="#"><i class="bi bi-arrow-clockwise me-2"></i>Restart Feed</a></li>
+                <li><a class="dropdown-item" href="#"><i class="bi bi-pencil me-2"></i>Преименуване</a></li>
+                <li><a class="dropdown-item" href="#"><i class="bi bi-arrow-clockwise me-2"></i>Рестартиране</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-trash me-2"></i>Remove</a></li>
+                <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-trash me-2"></i>Премахване</a></li>
               </ul>
             </div>
           </div>

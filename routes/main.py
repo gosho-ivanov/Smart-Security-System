@@ -4,6 +4,7 @@ from datetime import datetime
 
 from ..extensions import db
 from ..models import User, Door, PinCode, PinCodeDoor, Fingerprint, FingerprintDoor, AccessLog
+from .. import fingerprint_sensor
 
 main_bp = Blueprint('main', __name__)
 
@@ -60,13 +61,13 @@ def add_door():
     method_fp  = bool(request.form.get('method_fp'))
 
     if not name:
-        flash('Door name is required.', 'danger')
+        flash('Наименованието на вратата е задължително.', 'danger')
         return redirect(url_for('main.doors'))
 
     door = Door(name=name, location=location, method_pin=method_pin, method_fp=method_fp)
     db.session.add(door)
     db.session.commit()
-    flash(f'Door "{name}" added successfully.', 'success')
+    flash(f'Врата "{name}" е добавена успешно.', 'success')
     return redirect(url_for('main.doors'))
 
 
@@ -77,8 +78,8 @@ def toggle_door(door_id):
     door.is_locked   = not door.is_locked
     door.last_access = datetime.utcnow()
     db.session.commit()
-    status = 'locked' if door.is_locked else 'unlocked'
-    flash(f'{door.name} has been {status}.', 'success')
+    status = 'заключена' if door.is_locked else 'отключена'
+    flash(f'{door.name} е {status}.', 'success')
     return redirect(url_for('main.doors'))
 
 
@@ -101,7 +102,7 @@ def add_pin():
     expiry_str = request.form.get('expiry', '')
 
     if not raw_pin or len(raw_pin) < 4:
-        flash('PIN must be at least 4 digits.', 'danger')
+        flash('PIN кодът трябва да е поне 4 цифри.', 'danger')
         return redirect(url_for('main.access_codes'))
 
     expiry = None
@@ -120,7 +121,7 @@ def add_pin():
         db.session.add(PinCodeDoor(pin_code_id=pin.id, door_id=int(door_id)))
 
     db.session.commit()
-    flash('PIN code added successfully.', 'success')
+    flash('PIN кодът е добавен успешно.', 'success')
     return redirect(url_for('main.access_codes'))
 
 
@@ -130,8 +131,8 @@ def toggle_pin(pin_id):
     pin = PinCode.query.get_or_404(pin_id)
     pin.is_active = not pin.is_active
     db.session.commit()
-    status = 'enabled' if pin.is_active else 'disabled'
-    flash(f'PIN code has been {status}.', 'success')
+    status = 'активиран' if pin.is_active else 'деактивиран'
+    flash(f'PIN кодът е {status}.', 'success')
     return redirect(url_for('main.access_codes'))
 
 
@@ -158,7 +159,7 @@ def edit_pin(pin_id):
         db.session.add(PinCodeDoor(pin_code_id=pin.id, door_id=int(door_id)))
 
     db.session.commit()
-    flash('PIN code updated successfully.', 'success')
+    flash('PIN кодът е актуализиран успешно.', 'success')
     return redirect(url_for('main.access_codes'))
 
 
@@ -172,13 +173,51 @@ def fingerprints():
     return render_template('main/fingerprints.html', fps=fps, users=users, doors=doors)
 
 
+@main_bp.route('/fingerprints/enroll', methods=['POST'])
+@login_required
+def enroll_fingerprint():
+    user_id  = request.form.get('user_id')
+    door_ids = request.form.getlist('doors')
+
+    if not user_id:
+        flash('Моля, изберете потребител.', 'danger')
+        return redirect(url_for('main.fingerprints'))
+
+    try:
+        slot = fingerprint_sensor.enroll()
+    except ImportError as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('main.fingerprints'))
+    except RuntimeError as e:
+        flash(f'Регистрацията е неуспешна: {e}', 'danger')
+        return redirect(url_for('main.fingerprints'))
+
+    fp = Fingerprint(user_id=user_id, template_ref=str(slot))
+    db.session.add(fp)
+    db.session.flush()
+
+    for door_id in door_ids:
+        db.session.add(FingerprintDoor(fingerprint_id=fp.id, door_id=int(door_id)))
+
+    db.session.commit()
+    flash('Отпечатъкът е регистриран успешно.', 'success')
+    return redirect(url_for('main.fingerprints'))
+
+
 @main_bp.route('/fingerprints/<int:fp_id>/remove', methods=['POST'])
 @login_required
 def remove_fingerprint(fp_id):
     fp = Fingerprint.query.get_or_404(fp_id)
+
+    if fp.template_ref:
+        try:
+            fingerprint_sensor.delete(fp.template_ref)
+        except Exception as e:
+            flash(f'Предупреждение: отпечатъкът не може да бъде премахнат от сензора ({e}). Записът е изтрит от базата данни.', 'warning')
+
     db.session.delete(fp)
     db.session.commit()
-    flash('Fingerprint removed successfully.', 'success')
+    flash('Отпечатъкът е премахнат.', 'success')
     return redirect(url_for('main.fingerprints'))
 
 
@@ -201,7 +240,7 @@ def add_personnel():
     status     = request.form.get('status', 'active') == 'active'
 
     if not name:
-        flash('Name is required.', 'danger')
+        flash('Името е задължително.', 'danger')
         return redirect(url_for('main.personnel'))
 
     user = User(
@@ -214,7 +253,7 @@ def add_personnel():
     user.set_password('ChangeMe123!')
     db.session.add(user)
     db.session.commit()
-    flash(f'{name} added to allowed personnel.', 'success')
+    flash(f'{name} е добавен/а в разрешения персонал.', 'success')
     return redirect(url_for('main.personnel'))
 
 
@@ -222,12 +261,12 @@ def add_personnel():
 @login_required
 def remove_personnel(user_id):
     if user_id == current_user.id:
-        flash('You cannot remove your own account from here.', 'danger')
+        flash('Не можете да премахнете собствения си акаунт от тук.', 'danger')
         return redirect(url_for('main.personnel'))
     user = User.query.get_or_404(user_id)
     db.session.delete(user)
     db.session.commit()
-    flash(f'{user.name} has been removed.', 'success')
+    flash(f'{user.name} е премахнат/а.', 'success')
     return redirect(url_for('main.personnel'))
 
 
@@ -247,7 +286,7 @@ def edit_profile():
     current_user.username = request.form.get('username', current_user.username).strip()
     current_user.email    = request.form.get('email', current_user.email).strip()
     db.session.commit()
-    flash('Profile updated successfully.', 'success')
+    flash('Профилът е актуализиран успешно.', 'success')
     return redirect(url_for('main.profile'))
 
 
@@ -266,20 +305,20 @@ def change_password():
     confirm_pw  = request.form.get('confirm_password', '')
 
     if not current_user.check_password(current_pw):
-        flash('Current password is incorrect.', 'danger')
+        flash('Текущата парола е неправилна.', 'danger')
         return redirect(url_for('main.settings'))
 
     if new_pw != confirm_pw:
-        flash('New passwords do not match.', 'danger')
+        flash('Новите пароли не съвпадат.', 'danger')
         return redirect(url_for('main.settings'))
 
     if len(new_pw) < 8:
-        flash('Password must be at least 8 characters long.', 'danger')
+        flash('Паролата трябва да е поне 8 символа.', 'danger')
         return redirect(url_for('main.settings'))
 
     current_user.set_password(new_pw)
     db.session.commit()
-    flash('Password updated successfully.', 'success')
+    flash('Паролата е актуализирана успешно.', 'success')
     return redirect(url_for('main.settings'))
 
 
@@ -290,5 +329,5 @@ def deactivate_account():
     db.session.commit()
     from flask_login import logout_user
     logout_user()
-    flash('Your account has been deactivated.', 'success')
+    flash('Акаунтът ви е деактивиран.', 'success')
     return redirect(url_for('auth.login'))

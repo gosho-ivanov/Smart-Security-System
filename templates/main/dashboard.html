@@ -1,19 +1,19 @@
 {% extends "base.html" %}
-{% block title %}Dashboard — Smart Security System{% endblock %}
-{% block page_title %}System Overview{% endblock %}
-{% block page_subtitle %}Last updated: just now{% endblock %}
+{% block title %}Табло — Умна система за сигурност{% endblock %}
+{% block page_title %}Системен преглед{% endblock %}
+{% block page_subtitle %}Последно обновено: преди малко{% endblock %}
 
 {% block content %}
 
-<!-- Stat Cards -->
+<!-- Карти със статистики -->
 <div class="row g-3 mb-4">
   <div class="col-xl-3 col-sm-6">
     <div class="stat-card">
       <div class="stat-icon blue"><i class="bi bi-camera-video-fill"></i></div>
       <div class="stat-info">
-        <div class="stat-label">Active Cameras</div>
+        <div class="stat-label">Активни камери</div>
         <div class="stat-value">4</div>
-        <div class="stat-sub">3 online · 1 offline</div>
+        <div class="stat-sub">3 онлайн · 1 офлайн</div>
       </div>
     </div>
   </div>
@@ -21,9 +21,9 @@
     <div class="stat-card">
       <div class="stat-icon green"><i class="bi bi-door-closed-fill"></i></div>
       <div class="stat-info">
-        <div class="stat-label">Doors Status</div>
+        <div class="stat-label">Статус на врати</div>
         <div class="stat-value">3<span style="font-size:16px;color:var(--text-muted);font-weight:500;"> / 1</span></div>
-        <div class="stat-sub">Locked / Unlocked</div>
+        <div class="stat-sub">Заключени / Отключени</div>
       </div>
     </div>
   </div>
@@ -31,9 +31,9 @@
     <div class="stat-card">
       <div class="stat-icon amber"><i class="bi bi-grid-3x3-gap-fill"></i></div>
       <div class="stat-info">
-        <div class="stat-label">Active PIN Codes</div>
+        <div class="stat-label">Активни PIN кодове</div>
         <div class="stat-value">12</div>
-        <div class="stat-sub">2 expiring soon</div>
+        <div class="stat-sub">2 изтичат скоро</div>
       </div>
     </div>
   </div>
@@ -41,25 +41,25 @@
     <div class="stat-card">
       <div class="stat-icon sky"><i class="bi bi-fingerprint"></i></div>
       <div class="stat-info">
-        <div class="stat-label">Fingerprints</div>
+        <div class="stat-label">Отпечатъци</div>
         <div class="stat-value">8</div>
-        <div class="stat-sub">Registered users</div>
+        <div class="stat-sub">Регистрирани потребители</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Door Status + Notifications -->
+<!-- Статус на врати + Известия -->
 <div class="row g-3 mb-4">
-  <!-- Door Access Status -->
+  <!-- Статус на достъпа до врати -->
   <div class="col-xl-5">
     <div class="card h-100">
       <div class="card-header">
         <i class="bi bi-door-closed text-primary-color"></i>
-        <h5>Door Access Status</h5>
+        <h5>Статус на достъпа до врати</h5>
         <div class="card-header-actions">
           <a href="{{ url_for('main.doors') }}" class="btn btn-outline-primary btn-sm">
-            Manage <i class="bi bi-arrow-right"></i>
+            Управление <i class="bi bi-arrow-right"></i>
           </a>
         </div>
       </div>
@@ -68,51 +68,51 @@
         <div class="door-status-card">
           <div class="door-icon-wrap locked"><i class="bi bi-lock-fill"></i></div>
           <div class="door-info">
-            <div class="door-name">Main Entrance</div>
-            <div class="door-meta"><i class="bi bi-clock" style="font-size:11px;"></i> Last access: Oct 27 · 10:30 AM</div>
+            <div class="door-name">Главен вход</div>
+            <div class="door-meta"><i class="bi bi-clock" style="font-size:11px;"></i> Последен достъп: окт. 27 · 10:30</div>
           </div>
-          <span class="door-badge locked">Locked</span>
+          <span class="door-badge locked">Заключена</span>
         </div>
 
         <div class="door-status-card">
           <div class="door-icon-wrap unlocked"><i class="bi bi-lock-fill" style="opacity:.4;"></i></div>
           <div class="door-info">
-            <div class="door-name">Back Door</div>
-            <div class="door-meta"><i class="bi bi-clock" style="font-size:11px;"></i> Last access: Oct 27 · 09:15 AM</div>
+            <div class="door-name">Задна врата</div>
+            <div class="door-meta"><i class="bi bi-clock" style="font-size:11px;"></i> Последен достъп: окт. 27 · 09:15</div>
           </div>
-          <span class="door-badge unlocked">Unlocked</span>
+          <span class="door-badge unlocked">Отключена</span>
         </div>
 
         <div class="door-status-card">
           <div class="door-icon-wrap locked"><i class="bi bi-lock-fill"></i></div>
           <div class="door-info">
-            <div class="door-name">Garage Door</div>
-            <div class="door-meta"><i class="bi bi-clock" style="font-size:11px;"></i> Last access: Oct 26 · 06:45 PM</div>
+            <div class="door-name">Гаражна врата</div>
+            <div class="door-meta"><i class="bi bi-clock" style="font-size:11px;"></i> Последен достъп: окт. 26 · 18:45</div>
           </div>
-          <span class="door-badge locked">Locked</span>
+          <span class="door-badge locked">Заключена</span>
         </div>
 
         <div class="door-status-card">
           <div class="door-icon-wrap locked"><i class="bi bi-lock-fill"></i></div>
           <div class="door-info">
-            <div class="door-name">Side Gate</div>
-            <div class="door-meta"><i class="bi bi-clock" style="font-size:11px;"></i> Last access: Oct 26 · 02:10 PM</div>
+            <div class="door-name">Странична порта</div>
+            <div class="door-meta"><i class="bi bi-clock" style="font-size:11px;"></i> Последен достъп: окт. 26 · 14:10</div>
           </div>
-          <span class="door-badge locked">Locked</span>
+          <span class="door-badge locked">Заключена</span>
         </div>
 
       </div>
     </div>
   </div>
 
-  <!-- Recent Notifications -->
+  <!-- Последни известия -->
   <div class="col-xl-7">
     <div class="card h-100">
       <div class="card-header">
         <i class="bi bi-bell text-primary-color"></i>
-        <h5>Recent Notifications</h5>
+        <h5>Последни известия</h5>
         <div class="card-header-actions">
-          <button class="btn btn-outline-secondary btn-sm">Mark all read</button>
+          <button class="btn btn-outline-secondary btn-sm">Маркирай всички като прочетени</button>
         </div>
       </div>
       <div class="card-body">
@@ -120,38 +120,38 @@
 
           <div class="notif-item">
             <div class="notif-dot-wrap"><div class="notif-dot motion"></div></div>
-            <div class="notif-text"><strong>Motion detected</strong> at Main Entrance — triggered camera recording</div>
-            <div class="notif-time">10:45 AM</div>
+            <div class="notif-text"><strong>Засечено движение</strong> при Главен вход — задейства запис от камера</div>
+            <div class="notif-time">10:45</div>
           </div>
 
           <div class="notif-item">
             <div class="notif-dot-wrap"><div class="notif-dot access"></div></div>
-            <div class="notif-text"><strong>Door unlocked via PIN</strong> — Main Entrance by John Doe</div>
-            <div class="notif-time">10:30 AM</div>
+            <div class="notif-text"><strong>Врата отключена чрез PIN</strong> — Главен вход от Иван Иванов</div>
+            <div class="notif-time">10:30</div>
           </div>
 
           <div class="notif-item">
             <div class="notif-dot-wrap"><div class="notif-dot access"></div></div>
-            <div class="notif-text"><strong>Door unlocked via fingerprint</strong> — Back Door by Jane Smith</div>
-            <div class="notif-time">09:15 AM</div>
+            <div class="notif-text"><strong>Врата отключена чрез отпечатък</strong> — Задна врата от Мария Иванова</div>
+            <div class="notif-time">09:15</div>
           </div>
 
           <div class="notif-item">
             <div class="notif-dot-wrap"><div class="notif-dot failed"></div></div>
-            <div class="notif-text"><strong>Failed access attempt</strong> — Main Entrance · 3 wrong PIN entries</div>
-            <div class="notif-time">08:50 AM</div>
+            <div class="notif-text"><strong>Неуспешен опит за достъп</strong> — Главен вход · 3 грешни PIN записа</div>
+            <div class="notif-time">08:50</div>
           </div>
 
           <div class="notif-item">
             <div class="notif-dot-wrap"><div class="notif-dot motion"></div></div>
-            <div class="notif-text"><strong>Motion detected</strong> at Backyard Camera — 2 minute clip saved</div>
-            <div class="notif-time">07:22 AM</div>
+            <div class="notif-text"><strong>Засечено движение</strong> при Камера задна страна — 2-минутен клип записан</div>
+            <div class="notif-time">07:22</div>
           </div>
 
           <div class="notif-item">
             <div class="notif-dot-wrap"><div class="notif-dot system"></div></div>
-            <div class="notif-text"><strong>System update completed</strong> — Firmware v2.4.1 installed successfully</div>
-            <div class="notif-time">Yesterday</div>
+            <div class="notif-text"><strong>Системната актуализация завърши</strong> — Фърмуер v2.4.1 инсталиран успешно</div>
+            <div class="notif-time">Вчера</div>
           </div>
 
         </div>
@@ -160,34 +160,34 @@
   </div>
 </div>
 
-<!-- Camera Preview -->
+<!-- Преглед на камери -->
 <div class="card">
   <div class="card-header">
     <i class="bi bi-camera-video text-primary-color"></i>
-    <h5>Camera Preview</h5>
+    <h5>Преглед на камери</h5>
     <div class="card-header-actions d-flex gap-2">
       <a href="{{ url_for('main.cameras') }}" class="btn btn-outline-primary btn-sm">
-        Full View <i class="bi bi-arrows-fullscreen"></i>
+        Пълен изглед <i class="bi bi-arrows-fullscreen"></i>
       </a>
     </div>
   </div>
   <div class="card-body">
     <div class="row g-3">
       {% for cam in [
-        {'name': 'Front Door Camera', 'status': 'online'},
-        {'name': 'Backyard Camera',   'status': 'online'},
-        {'name': 'Living Room Camera','status': 'offline'},
-        {'name': 'Garage Camera',     'status': 'online'}
+        {'name': 'Камера входна врата', 'status': 'online'},
+        {'name': 'Камера задна страна', 'status': 'online'},
+        {'name': 'Камера дневна',       'status': 'offline'},
+        {'name': 'Камера гараж',        'status': 'online'}
       ] %}
       <div class="col-md-6 col-xl-3">
         <div class="camera-feed">
           <div class="cam-placeholder">
             <i class="bi bi-{% if cam.status == 'offline' %}camera-video-off{% else %}camera-video{% endif %}"></i>
-            <span>{% if cam.status == 'offline' %}OFFLINE{% else %}NO SIGNAL{% endif %}</span>
+            <span>{% if cam.status == 'offline' %}ОФЛАЙН{% else %}БЕЗ СИГНАЛ{% endif %}</span>
           </div>
           <div class="cam-overlay-top">
-            <button class="cam-action-btn" title="Fullscreen"><i class="bi bi-fullscreen"></i></button>
-            <button class="cam-action-btn" title="Settings"><i class="bi bi-gear"></i></button>
+            <button class="cam-action-btn" title="Цял екран"><i class="bi bi-fullscreen"></i></button>
+            <button class="cam-action-btn" title="Настройки"><i class="bi bi-gear"></i></button>
           </div>
           <div class="cam-label">
             <span class="cam-status-dot {{ cam.status }}"></span>

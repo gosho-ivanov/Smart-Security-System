@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bg">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Security System</title>
+  <title>Умна система за сигурност</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
@@ -75,7 +75,6 @@
     .l-stat-num { font-size:28px;font-weight:800;color:#fff;letter-spacing:-1px; }
     .l-stat-label { font-size:12px;color:#64748B;font-weight:600;margin-top:2px; }
 
-    /* floating icons */
     .float-icons {
       position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0;
     }
@@ -102,38 +101,38 @@
   <div class="landing-content">
     <div class="landing-badge">
       <i class="bi bi-shield-check"></i>
-      Enterprise-Grade Protection
+      Защита от корпоративен клас
     </div>
 
     <h1 class="landing-title">
-      Smart Security<br /><span>System</span>
+      Умна система за<br /><span>сигурност</span>
     </h1>
 
     <p class="landing-desc">
-      Your trusted partner in home and business security. Monitor cameras, manage door access, control PIN codes and fingerprints — all from a single dashboard.
+      Вашият надежден партньор в домашната и бизнес сигурност. Следете камери, управлявайте достъпа до врати, контролирайте PIN кодове и пръстови отпечатъци — всичко от едно табло.
     </p>
 
     <div class="landing-btns">
       <a href="{{ url_for('auth.signup') }}" class="landing-btn-primary">
-        <i class="bi bi-person-plus"></i> Sign Up Free
+        <i class="bi bi-person-plus"></i> Регистрирай се
       </a>
       <a href="{{ url_for('auth.login') }}" class="landing-btn-outline">
-        <i class="bi bi-box-arrow-in-right"></i> Log In
+        <i class="bi bi-box-arrow-in-right"></i> Вход
       </a>
     </div>
 
     <div class="landing-stats">
       <div class="l-stat">
         <div class="l-stat-num">99.9%</div>
-        <div class="l-stat-label">Uptime</div>
+        <div class="l-stat-label">Наличност</div>
       </div>
       <div class="l-stat">
         <div class="l-stat-num">&lt; 1s</div>
-        <div class="l-stat-label">Response Time</div>
+        <div class="l-stat-label">Време за отговор</div>
       </div>
       <div class="l-stat">
         <div class="l-stat-num">256-bit</div>
-        <div class="l-stat-label">Encryption</div>
+        <div class="l-stat-label">Криптиране</div>
       </div>
     </div>
   </div>

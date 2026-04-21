@@ -1,27 +1,27 @@
 {% extends "base.html" %}
-{% block title %}Doors — Smart Security System{% endblock %}
-{% block page_title %}Doors{% endblock %}
-{% block page_subtitle %}Control and monitor all access points{% endblock %}
+{% block title %}Врати — Умна система за сигурност{% endblock %}
+{% block page_title %}Врати{% endblock %}
+{% block page_subtitle %}Контролирайте и наблюдавайте всички точки за достъп{% endblock %}
 
 {% block content %}
 
 <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
   <div class="search-bar">
     <i class="bi bi-search"></i>
-    <input type="text" class="form-control" placeholder="Search doors…" id="doorSearch" />
+    <input type="text" class="form-control" placeholder="Търсене на врати…" id="doorSearch" />
   </div>
   <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addDoorModal">
-    <i class="bi bi-plus-lg"></i> Add Door
+    <i class="bi bi-plus-lg"></i> Добавяне на врата
   </button>
 </div>
 
-<!-- Doors Table -->
+<!-- Таблица с врати -->
 <div class="card">
   <div class="card-header">
     <i class="bi bi-door-closed text-primary-color"></i>
-    <h5>Access Points</h5>
+    <h5>Точки за достъп</h5>
     <div class="card-header-actions">
-      <span style="font-size:12.5px;color:var(--text-muted);">4 doors registered</span>
+      <span style="font-size:12.5px;color:var(--text-muted);">{{ doors|length }} регистрирани врати</span>
     </div>
   </div>
   <div class="card-body" style="padding:0;">
@@ -29,64 +29,67 @@
       <table class="data-table" id="doorTable">
         <thead>
           <tr>
-            <th>Door Name</th>
-            <th>Location</th>
-            <th>Status</th>
-            <th>Access Methods</th>
-            <th>Last Access</th>
-            <th>Actions</th>
+            <th>Наименование</th>
+            <th>Местоположение</th>
+            <th>Статус</th>
+            <th>Методи за достъп</th>
+            <th>Последен достъп</th>
+            <th>Действия</th>
           </tr>
         </thead>
         <tbody>
-          {% for door in [
-            {'name': 'Main Entrance', 'location': 'Front of House',  'status': 'Locked',   'methods': ['PIN Code', 'Fingerprint'], 'last': 'Oct 27 · 10:30 AM'},
-            {'name': 'Back Door',     'location': 'Rear of House',   'status': 'Unlocked', 'methods': ['PIN Code', 'Fingerprint'], 'last': 'Oct 27 · 09:15 AM'},
-            {'name': 'Garage Door',   'location': 'Garage',          'status': 'Locked',   'methods': ['PIN Code'],               'last': 'Oct 26 · 06:45 PM'},
-            {'name': 'Side Gate',     'location': 'East Side Yard',  'status': 'Locked',   'methods': ['Fingerprint'],            'last': 'Oct 26 · 02:10 PM'},
-          ] %}
+          {% for door in doors %}
           <tr class="door-row" data-name="{{ door.name|lower }}">
             <td>
               <div style="display:flex;align-items:center;gap:10px;">
-                <div class="door-icon-wrap {{ 'locked' if door.status == 'Locked' else 'unlocked' }}" style="width:34px;height:34px;font-size:14px;">
-                  <i class="bi bi-lock{% if door.status == 'Unlocked' %}-open{% endif %}-fill"></i>
+                <div class="door-icon-wrap {{ 'locked' if door.is_locked else 'unlocked' }}" style="width:34px;height:34px;font-size:14px;">
+                  <i class="bi bi-lock{% if not door.is_locked %}-open{% endif %}-fill"></i>
                 </div>
                 <span style="font-weight:600;">{{ door.name }}</span>
               </div>
             </td>
             <td style="color:var(--text-secondary);">
-              <i class="bi bi-geo-alt" style="font-size:12px;margin-right:4px;"></i>{{ door.location }}
+              <i class="bi bi-geo-alt" style="font-size:12px;margin-right:4px;"></i>{{ door.location or '—' }}
             </td>
             <td>
-              <span class="door-badge {{ 'locked' if door.status == 'Locked' else 'unlocked' }}">
-                {{ door.status }}
+              <span class="door-badge {{ 'locked' if door.is_locked else 'unlocked' }}">
+                {{ 'Заключена' if door.is_locked else 'Отключена' }}
               </span>
             </td>
             <td>
-              {% for method in door.methods %}
-                <span class="method-pill {{ 'method-pin' if 'PIN' in method else 'method-fp' }}">
-                  <i class="bi bi-{{ 'grid-3x3-gap' if 'PIN' in method else 'fingerprint' }}" style="font-size:10px;"></i>
-                  {{ method }}
+              {% if door.method_pin %}
+                <span class="method-pill method-pin">
+                  <i class="bi bi-grid-3x3-gap" style="font-size:10px;"></i> PIN код
                 </span>
-              {% endfor %}
+              {% endif %}
+              {% if door.method_fp %}
+                <span class="method-pill method-fp">
+                  <i class="bi bi-fingerprint" style="font-size:10px;"></i> Отпечатък
+                </span>
+              {% endif %}
             </td>
             <td style="font-size:12.5px;color:var(--text-muted);">
-              <i class="bi bi-clock" style="font-size:11px;margin-right:4px;"></i>{{ door.last }}
+              <i class="bi bi-clock" style="font-size:11px;margin-right:4px;"></i>
+              {{ door.last_access.strftime('%-d %b · %H:%M') if door.last_access else '—' }}
             </td>
             <td>
               <div class="d-flex gap-2">
-                <a href="#" class="btn btn-outline-primary btn-sm">
-                  <i class="bi bi-gear"></i> Manage
-                </a>
-                <button class="btn btn-sm {{ 'btn-outline-success' if door.status == 'Locked' else 'btn-outline-danger' }}"
-                        onclick="toggleDoor(this, '{{ door.name }}')"
-                        data-status="{{ door.status }}">
-                  {% if door.status == 'Locked' %}
-                    <i class="bi bi-lock-open"></i> Unlock
-                  {% else %}
-                    <i class="bi bi-lock"></i> Lock
-                  {% endif %}
-                </button>
+                <form method="POST" action="{{ url_for('main.toggle_door', door_id=door.id) }}" style="display:inline;">
+                  <button type="submit" class="btn btn-sm {{ 'btn-outline-success' if door.is_locked else 'btn-outline-danger' }}">
+                    {% if door.is_locked %}
+                      <i class="bi bi-lock-open"></i> Отключи
+                    {% else %}
+                      <i class="bi bi-lock"></i> Заключи
+                    {% endif %}
+                  </button>
+                </form>
               </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">
+              Няма регистрирани врати.
             </td>
           </tr>
           {% endfor %}
@@ -96,45 +99,45 @@
   </div>
 </div>
 
-<!-- Add Door Modal -->
+<!-- Модал за добавяне на врата -->
 <div class="modal fade" id="addDoorModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-plus-circle me-2 text-primary-color"></i>Add New Door</h5>
+        <h5 class="modal-title"><i class="bi bi-plus-circle me-2 text-primary-color"></i>Добавяне на нова врата</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="#">
+      <form method="POST" action="{{ url_for('main.add_door') }}">
         <div class="modal-body">
           <div class="mb-3">
-            <label class="form-label">Door Name</label>
-            <input type="text" name="name" class="form-control" placeholder="e.g. Main Entrance" required />
+            <label class="form-label">Наименование</label>
+            <input type="text" name="name" class="form-control" placeholder="напр. Главен вход" required />
           </div>
           <div class="mb-3">
-            <label class="form-label">Location / Description</label>
-            <input type="text" name="location" class="form-control" placeholder="e.g. Front of House" />
+            <label class="form-label">Местоположение / Описание</label>
+            <input type="text" name="location" class="form-control" placeholder="напр. Предна страна на сградата" />
           </div>
           <div class="mb-3">
-            <label class="form-label">Access Methods</label>
+            <label class="form-label">Методи за достъп</label>
             <div style="display:flex;flex-direction:column;gap:10px;padding:14px;background:var(--body-bg);border-radius:var(--radius-sm);border:1px solid var(--border);">
               <div class="d-flex align-items-center gap-2">
                 <input type="checkbox" class="form-check-input" id="m_pin" name="method_pin" value="1" checked />
                 <label for="m_pin" class="form-label mb-0" style="cursor:pointer;">
-                  <i class="bi bi-grid-3x3-gap me-1"></i> PIN Code
+                  <i class="bi bi-grid-3x3-gap me-1"></i> PIN код
                 </label>
               </div>
               <div class="d-flex align-items-center gap-2">
                 <input type="checkbox" class="form-check-input" id="m_fp" name="method_fp" value="1" />
                 <label for="m_fp" class="form-label mb-0" style="cursor:pointer;">
-                  <i class="bi bi-fingerprint me-1"></i> Fingerprint
+                  <i class="bi bi-fingerprint me-1"></i> Пръстов отпечатък
                 </label>
               </div>
             </div>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Add Door</button>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отказ</button>
+          <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Добавяне на врата</button>
         </div>
       </form>
     </div>
@@ -151,23 +154,5 @@ document.getElementById('doorSearch').addEventListener('input', function() {
     row.style.display = row.dataset.name.includes(q) ? '' : 'none';
   });
 });
-
-function toggleDoor(btn, name) {
-  const isLocked = btn.dataset.status === 'Locked';
-  if (confirm(`${isLocked ? 'Unlock' : 'Lock'} "${name}"?`)) {
-    btn.dataset.status = isLocked ? 'Unlocked' : 'Locked';
-    btn.className = `btn btn-sm ${isLocked ? 'btn-outline-danger' : 'btn-outline-success'}`;
-    btn.innerHTML = isLocked
-      ? '<i class="bi bi-lock"></i> Lock'
-      : '<i class="bi bi-lock-open"></i> Unlock';
-    const row = btn.closest('tr');
-    const badge = row.querySelector('.door-badge');
-    badge.textContent = isLocked ? 'Unlocked' : 'Locked';
-    badge.className = `door-badge ${isLocked ? 'unlocked' : 'locked'}`;
-    const iconWrap = row.querySelector('.door-icon-wrap');
-    iconWrap.className = `door-icon-wrap ${isLocked ? 'unlocked' : 'locked'}`;
-    iconWrap.innerHTML = `<i class="bi bi-lock${isLocked ? '-open' : ''}-fill"></i>`;
-  }
-}
 </script>
 {% endblock %}

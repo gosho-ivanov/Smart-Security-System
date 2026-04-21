@@ -1,59 +1,61 @@
 {% extends "base.html" %}
-{% block title %}Profile — Smart Security System{% endblock %}
-{% block page_title %}User Profile{% endblock %}
-{% block page_subtitle %}Manage your personal information and access{% endblock %}
+{% block title %}Профил — Умна система за сигурност{% endblock %}
+{% block page_title %}Потребителски профил{% endblock %}
+{% block page_subtitle %}Управлявайте личната си информация и достъп{% endblock %}
 
 {% block content %}
 
-<!-- Profile Hero -->
+<!-- Заглавна лента на профила -->
 <div class="profile-hero mb-4">
-  <div class="profile-avatar">JD</div>
+  <div class="profile-avatar">{{ current_user.initials }}</div>
   <div class="profile-hero-info">
-    <h3>John Doe</h3>
+    <h3>{{ current_user.name }}</h3>
     <div style="display:flex;gap:12px;flex-wrap:wrap;">
-      <span class="badge-pill badge-active">Administrator</span>
+      <span class="badge-pill badge-active">{{ 'Администратор' if current_user.role == 'administrator' else 'Потребител' }}</span>
       <span style="color:rgba(148,163,184,.8);font-size:13px;display:flex;align-items:center;gap:5px;">
-        <i class="bi bi-envelope"></i> john.doe@example.com
+        <i class="bi bi-envelope"></i> {{ current_user.email }}
       </span>
     </div>
     <div class="profile-meta mt-2">
       <div class="profile-meta-item">
-        <i class="bi bi-person-badge"></i> @johndoe
+        <i class="bi bi-person-badge"></i> @{{ current_user.username }}
       </div>
       <div class="profile-meta-item">
-        <i class="bi bi-calendar3"></i> Joined Oct 2023
+        <i class="bi bi-calendar3"></i> Регистриран {{ current_user.created_at.strftime('%-d %b %Y') }}
       </div>
+      {% if current_user.last_login %}
       <div class="profile-meta-item">
-        <i class="bi bi-clock"></i> Last login: Today 10:30 AM
+        <i class="bi bi-clock"></i> Последен вход: {{ current_user.last_login.strftime('%-d %b %Y %H:%M') }}
       </div>
+      {% endif %}
     </div>
   </div>
   <div style="margin-left:auto;z-index:1;">
     <a href="{{ url_for('main.settings') }}" class="btn btn-outline-secondary btn-sm" style="color:rgba(148,163,184,.9);border-color:rgba(255,255,255,.12);background:rgba(255,255,255,.05);">
-      <i class="bi bi-gear"></i> Settings
+      <i class="bi bi-gear"></i> Настройки
     </a>
   </div>
 </div>
 
 <div class="row g-3">
-  <!-- Personal Information -->
+  <!-- Лична информация -->
   <div class="col-lg-5">
     <div class="card mb-3">
       <div class="card-header">
         <i class="bi bi-person text-primary-color"></i>
-        <h5>Personal Information</h5>
+        <h5>Лична информация</h5>
         <div class="card-header-actions">
           <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-            <i class="bi bi-pencil"></i> Edit
+            <i class="bi bi-pencil"></i> Редакция
           </button>
         </div>
       </div>
       <div class="card-body">
         {% for field in [
-          {'label': 'Full Name',  'value': 'John Doe',              'icon': 'person'},
-          {'label': 'Username',   'value': '@johndoe',              'icon': 'at'},
-          {'label': 'Email',      'value': 'john.doe@example.com',  'icon': 'envelope'},
-          {'label': 'Role',       'value': 'Administrator',         'icon': 'shield-check'},
+          {'label': 'Пълно име',            'value': current_user.name,     'icon': 'person'},
+          {'label': 'Потребителско име',     'value': '@' ~ current_user.username, 'icon': 'at'},
+          {'label': 'Имейл',                'value': current_user.email,    'icon': 'envelope'},
+          {'label': 'Роля',                 'value': 'Администратор' if current_user.role == 'administrator' else 'Потребител', 'icon': 'shield-check'},
         ] %}
         <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-light);">
           <div style="width:34px;height:34px;border-radius:var(--radius-sm);background:var(--body-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -69,11 +71,11 @@
       </div>
     </div>
 
-    <!-- Linked Access Methods -->
+    <!-- Свързани методи за достъп -->
     <div class="card">
       <div class="card-header">
         <i class="bi bi-shield-lock text-primary-color"></i>
-        <h5>Linked Access Methods</h5>
+        <h5>Свързани методи за достъп</h5>
       </div>
       <div class="card-body">
         <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-light);">
@@ -81,54 +83,56 @@
             <i class="bi bi-grid-3x3-gap" style="color:var(--primary);font-size:16px;"></i>
           </div>
           <div style="flex:1;">
-            <div style="font-size:14px;font-weight:600;color:var(--text-primary);">PIN Code</div>
-            <div style="font-size:12px;color:var(--text-muted);">4-digit keypad access</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text-primary);">PIN код</div>
+            <div style="font-size:12px;color:var(--text-muted);">Достъп чрез цифрова клавиатура</div>
           </div>
-          <span class="badge-pill badge-active">Active</span>
+          <span class="badge-pill {{ 'badge-active' if current_user.pin_codes else 'badge-inactive' }}">
+            {{ 'Активен' if current_user.pin_codes else 'Неактивен' }}
+          </span>
         </div>
         <div style="display:flex;align-items:center;gap:12px;padding:12px 0;">
           <div style="width:38px;height:38px;border-radius:var(--radius-sm);background:#F0FDF4;display:flex;align-items:center;justify-content:center;">
             <i class="bi bi-fingerprint" style="color:var(--success);font-size:16px;"></i>
           </div>
           <div style="flex:1;">
-            <div style="font-size:14px;font-weight:600;color:var(--text-primary);">Fingerprint</div>
-            <div style="font-size:12px;color:var(--text-muted);">Biometric sensor</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text-primary);">Пръстов отпечатък</div>
+            <div style="font-size:12px;color:var(--text-muted);">Биометричен сензор</div>
           </div>
-          <span class="badge-pill badge-active">Enrolled</span>
+          <span class="badge-pill {{ 'badge-active' if current_user.fingerprints else 'badge-inactive' }}">
+            {{ 'Регистриран' if current_user.fingerprints else 'Не е регистриран' }}
+          </span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Recent Activity -->
+  <!-- Скорошна активност -->
   <div class="col-lg-7">
     <div class="card h-100">
       <div class="card-header">
         <i class="bi bi-clock-history text-primary-color"></i>
-        <h5>Recent Access Activity</h5>
-        <div class="card-header-actions">
-          <select class="form-select" style="width:auto;font-size:12.5px;height:30px;padding:0 10px;">
-            <option>Last 7 days</option>
-            <option>Last 30 days</option>
-            <option>All time</option>
-          </select>
-        </div>
+        <h5>Скорошна активност</h5>
       </div>
       <div class="card-body">
         <div class="notif-list">
-          {% for event in [
-            {'type': 'access',  'desc': 'Main Entrance unlocked via <strong>PIN Code</strong>',          'time': 'Oct 27 · 10:30 AM'},
-            {'type': 'access',  'desc': 'Back Door unlocked via <strong>Fingerprint</strong>',           'time': 'Oct 27 · 09:15 AM'},
-            {'type': 'motion',  'desc': 'Motion detected at <strong>Main Entrance</strong>',              'time': 'Oct 26 · 08:00 PM'},
-            {'type': 'failed',  'desc': 'Failed access attempt at <strong>Main Entrance</strong>',        'time': 'Oct 25 · 07:45 PM'},
-            {'type': 'access',  'desc': 'Garage Door unlocked via <strong>PIN Code</strong>',            'time': 'Oct 25 · 06:30 PM'},
-            {'type': 'system',  'desc': 'PIN Code updated for <strong>Back Door</strong>',               'time': 'Oct 24 · 11:00 AM'},
-            {'type': 'access',  'desc': 'Main Entrance unlocked via <strong>Fingerprint</strong>',       'time': 'Oct 24 · 08:15 AM'},
-          ] %}
+          {% for log in logs %}
           <div class="notif-item">
-            <div class="notif-dot-wrap"><div class="notif-dot {{ event.type }}"></div></div>
-            <div class="notif-text">{{ event.desc }}</div>
-            <div class="notif-time">{{ event.time }}</div>
+            <div class="notif-dot-wrap">
+              <div class="notif-dot {{ 'access' if log.success else 'failed' }}"></div>
+            </div>
+            <div class="notif-text">
+              {% if log.success %}
+                <strong>{{ log.door.name if log.door else '—' }}</strong> отключена чрез
+                <strong>{{ 'PIN код' if log.method == 'pin' else 'пръстов отпечатък' if log.method == 'fingerprint' else log.method }}</strong>
+              {% else %}
+                <strong>Неуспешен опит</strong> при {{ log.door.name if log.door else '—' }}
+              {% endif %}
+            </div>
+            <div class="notif-time">{{ log.timestamp.strftime('%-d %b %H:%M') }}</div>
+          </div>
+          {% else %}
+          <div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">
+            Няма записана активност.
           </div>
           {% endfor %}
         </div>
@@ -137,32 +141,32 @@
   </div>
 </div>
 
-<!-- Edit Profile Modal -->
+<!-- Модал за редакция на профила -->
 <div class="modal fade" id="editProfileModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-pencil me-2 text-primary-color"></i>Edit Profile</h5>
+        <h5 class="modal-title"><i class="bi bi-pencil me-2 text-primary-color"></i>Редактиране на профила</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="#">
+      <form method="POST" action="{{ url_for('main.edit_profile') }}">
         <div class="modal-body">
           <div class="mb-3">
-            <label class="form-label">Full Name</label>
-            <input type="text" name="name" class="form-control" value="John Doe" />
+            <label class="form-label">Пълно име</label>
+            <input type="text" name="name" class="form-control" value="{{ current_user.name }}" />
           </div>
           <div class="mb-3">
-            <label class="form-label">Username</label>
-            <input type="text" name="username" class="form-control" value="johndoe" />
+            <label class="form-label">Потребителско име</label>
+            <input type="text" name="username" class="form-control" value="{{ current_user.username }}" />
           </div>
           <div class="mb-3">
-            <label class="form-label">Email Address</label>
-            <input type="email" name="email" class="form-control" value="john.doe@example.com" />
+            <label class="form-label">Имейл адрес</label>
+            <input type="email" name="email" class="form-control" value="{{ current_user.email }}" />
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save Changes</button>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отказ</button>
+          <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Запазване на промените</button>
         </div>
       </form>
     </div>

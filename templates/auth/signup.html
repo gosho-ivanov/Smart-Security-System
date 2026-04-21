@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bg">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sign Up — Smart Security System</title>
+  <title>Регистрация — Умна система за сигурност</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
@@ -11,43 +11,43 @@
 <body>
 <div class="auth-wrapper">
 
-  <!-- Left Panel -->
+  <!-- Ляв панел -->
   <div class="auth-left">
     <div class="auth-brand">
       <div class="brand-icon"><i class="bi bi-shield-lock-fill"></i></div>
       <h1>SecureGuard</h1>
-      <p>Enterprise-grade security management for your home and business.</p>
+      <p>Управление на сигурността от корпоративен клас за вашия дом и бизнес.</p>
     </div>
     <div class="auth-features">
       <div class="auth-feature-item">
         <div class="feat-icon"><i class="bi bi-camera-video"></i></div>
-        <span>Real-time camera monitoring with live feeds</span>
+        <span>Мониторинг на камери в реално време</span>
       </div>
       <div class="auth-feature-item">
         <div class="feat-icon"><i class="bi bi-fingerprint"></i></div>
-        <span>Biometric fingerprint authentication</span>
+        <span>Биометрично удостоверяване с пръстов отпечатък</span>
       </div>
       <div class="auth-feature-item">
         <div class="feat-icon"><i class="bi bi-grid-3x3-gap"></i></div>
-        <span>Multi-door PIN code access control</span>
+        <span>Контрол на достъп с PIN код за множество врати</span>
       </div>
       <div class="auth-feature-item">
         <div class="feat-icon"><i class="bi bi-bell-fill"></i></div>
-        <span>Instant security alerts and notifications</span>
+        <span>Незабавни предупреждения за сигурност</span>
       </div>
     </div>
   </div>
 
-  <!-- Right Panel -->
+  <!-- Десен панел -->
   <div class="auth-right">
     <div class="auth-form-box">
       <p class="form-subtitle" style="margin-bottom:6px;">
         <a href="{{ url_for('main.index') }}" style="color:var(--text-muted);font-size:13px;display:inline-flex;align-items:center;gap:5px;">
-          <i class="bi bi-arrow-left"></i> Back to home
+          <i class="bi bi-arrow-left"></i> Назад към началото
         </a>
       </p>
-      <h2 class="form-title">Create your account</h2>
-      <p class="form-subtitle">Set up your security management portal</p>
+      <h2 class="form-title">Създайте акаунт</h2>
+      <p class="form-subtitle">Настройте портала за управление на сигурността</p>
 
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}{% for category, message in messages %}
@@ -61,49 +61,49 @@
       <form method="POST" action="{{ url_for('auth.signup') }}">
         <div class="row g-3 mb-3">
           <div class="col-6">
-            <label class="form-label">Full Name</label>
+            <label class="form-label">Пълно име</label>
             <div class="input-icon-wrap">
               <i class="bi bi-person input-icon"></i>
-              <input type="text" name="name" class="form-control" placeholder="John Doe" required />
+              <input type="text" name="name" class="form-control" placeholder="Иван Иванов" required />
             </div>
           </div>
           <div class="col-6">
-            <label class="form-label">Username</label>
+            <label class="form-label">Потребителско име</label>
             <div class="input-icon-wrap">
               <i class="bi bi-at input-icon"></i>
-              <input type="text" name="username" class="form-control" placeholder="johndoe" required />
+              <input type="text" name="username" class="form-control" placeholder="ivanov" required />
             </div>
           </div>
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Email address</label>
+          <label class="form-label">Имейл адрес</label>
           <div class="input-icon-wrap">
             <i class="bi bi-envelope input-icon"></i>
-            <input type="email" name="email" class="form-control" placeholder="you@example.com" required />
+            <input type="email" name="email" class="form-control" placeholder="вие@пример.com" required />
           </div>
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Password</label>
+          <label class="form-label">Парола</label>
           <div class="input-icon-wrap">
             <i class="bi bi-lock input-icon"></i>
-            <input type="password" name="password" id="password" class="form-control" placeholder="Min. 8 characters" required />
+            <input type="password" name="password" id="password" class="form-control" placeholder="Мин. 8 символа" required />
           </div>
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Confirm Password</label>
+          <label class="form-label">Потвърдете паролата</label>
           <div class="input-icon-wrap">
             <i class="bi bi-lock-fill input-icon"></i>
-            <input type="password" name="confirm_password" class="form-control" placeholder="Repeat your password" required />
+            <input type="password" name="confirm_password" class="form-control" placeholder="Повторете паролата" required />
           </div>
         </div>
 
-        <!-- Password strength indicator -->
+        <!-- Индикатор за сила на паролата -->
         <div class="mb-4">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-            <span style="font-size:12px;color:var(--text-muted);">Password strength:</span>
+            <span style="font-size:12px;color:var(--text-muted);">Сила на паролата:</span>
             <span id="strength-label" style="font-size:12px;font-weight:700;color:var(--text-muted);">—</span>
           </div>
           <div style="height:4px;border-radius:4px;background:var(--border);overflow:hidden;">
@@ -112,13 +112,13 @@
         </div>
 
         <button type="submit" class="btn btn-primary btn-full btn-lg mb-4">
-          <i class="bi bi-person-plus"></i> Create Account
+          <i class="bi bi-person-plus"></i> Създай акаунт
         </button>
       </form>
 
       <p style="text-align:center;font-size:13.5px;color:var(--text-muted);">
-        Already have an account?
-        <a href="{{ url_for('auth.login') }}" style="color:var(--primary);font-weight:700;">Sign in</a>
+        Вече имате акаунт?
+        <a href="{{ url_for('auth.login') }}" style="color:var(--primary);font-weight:700;">Влезте</a>
       </p>
     </div>
   </div>
@@ -139,10 +139,10 @@
     if (/[^A-Za-z0-9]/.test(val)) score++;
 
     const levels = [
-      { w: '25%', color: '#EF4444', text: 'Weak' },
-      { w: '50%', color: '#F59E0B', text: 'Fair' },
-      { w: '75%', color: '#3B82F6', text: 'Good' },
-      { w: '100%', color: '#10B981', text: 'Strong' },
+      { w: '25%', color: '#EF4444', text: 'Слаба' },
+      { w: '50%', color: '#F59E0B', text: 'Задоволителна' },
+      { w: '75%', color: '#3B82F6', text: 'Добра' },
+      { w: '100%', color: '#10B981', text: 'Силна' },
     ];
     if (val.length === 0) { bar.style.width = '0'; label.textContent = '—'; label.style.color = 'var(--text-muted)'; return; }
     const level = levels[score - 1] || levels[0];

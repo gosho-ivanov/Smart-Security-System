@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Access Denied — Smart Security System{% endblock %}
-{% block page_title %}Error{% endblock %}
+{% block title %}Отказан достъп — Умна система за сигурност{% endblock %}
+{% block page_title %}Грешка{% endblock %}
 
 {% block content %}
 <div class="error-page">
@@ -8,16 +8,16 @@
   <div class="error-icon-wrap">
     <i class="bi bi-shield-x"></i>
   </div>
-  <h3 style="font-size:22px;font-weight:800;color:var(--text-primary);margin-bottom:10px;letter-spacing:-.3px;">Access Denied</h3>
+  <h3 style="font-size:22px;font-weight:800;color:var(--text-primary);margin-bottom:10px;letter-spacing:-.3px;">Отказан достъп</h3>
   <p style="font-size:14px;color:var(--text-secondary);max-width:380px;margin-bottom:28px;line-height:1.7;">
-    You don't have permission to access this page. If you believe this is a mistake, please contact your system administrator.
+    Нямате разрешение за достъп до тази страница. Ако смятате, че това е грешка, моля свържете се с администратора на системата.
   </p>
   <div style="display:flex;gap:12px;">
     <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">
-      <i class="bi bi-house"></i> Return to Dashboard
+      <i class="bi bi-house"></i> Към таблото
     </a>
     <a href="{{ url_for('main.profile') }}" class="btn btn-outline-secondary">
-      <i class="bi bi-person"></i> My Profile
+      <i class="bi bi-person"></i> Моят профил
     </a>
   </div>
 </div>

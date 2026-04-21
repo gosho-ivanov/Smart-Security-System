@@ -5,3 +5,7 @@ PyMySQL==1.1.1
 Werkzeug==3.0.3
 python-dotenv==1.0.1
 cryptography==42.0.8
+
+# Raspberry Pi hardware — install only on the Pi
+# RPi.GPIO       # matrix keypad (4x3)
+# pyfingerprint  # AS608 fingerprint sensor
