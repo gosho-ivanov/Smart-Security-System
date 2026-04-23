@@ -60,6 +60,12 @@
         </a>
       </div>
       <div class="nav-item">
+        <a href="{{ url_for('main.faces') }}" class="nav-link {% if request.endpoint == 'main.faces' %}active{% endif %}">
+          <span class="nav-icon"><i class="bi bi-person-bounding-box"></i></span>
+          Разпознаване на лица
+        </a>
+      </div>
+      <div class="nav-item">
         <a href="{{ url_for('main.personnel') }}" class="nav-link {% if request.endpoint == 'main.personnel' %}active{% endif %}">
           <span class="nav-icon"><i class="bi bi-people"></i></span>
           Разрешен персонал

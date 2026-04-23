@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block title %}Разпознаване на лица — Умна система за сигурност{% endblock %}
+{% block page_title %}Разпознаване на лица{% endblock %}
+{% block page_subtitle %}Управление на биометрични регистрации чрез лицево разпознаване{% endblock %}
+
+{% block content %}
+
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+  <div class="search-bar">
+    <i class="bi bi-search"></i>
+    <input type="text" class="form-control" placeholder="Търсене на потребители…" id="faceSearch" />
+  </div>
+  <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#enrollFaceModal">
+    <i class="bi bi-person-bounding-box"></i> Регистриране на лице
+  </button>
+</div>
+
+<div class="alert-box alert-info mb-4">
+  <i class="bi bi-info-circle"></i>
+  <div>
+    Регистрирането използва USB камерата. Уверете се, че лицето на потребителя е ясно видимо пред камерата,
+    след което кликнете <strong>Започни регистрация</strong>. Можете да прегледате потока на живо в страницата
+    <a href="{{ url_for('main.cameras') }}">Камери</a>.
+    За да се активира разпознаването за дадена врата, включете <em>Лицево разпознаване</em> в настройките на вратата.
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <i class="bi bi-person-bounding-box text-primary-color"></i>
+    <h5>Регистрирани лица</h5>
+    <div class="card-header-actions">
+      <span style="font-size:12.5px;color:var(--text-muted);">{{ face_list|length }} регистрирани</span>
+    </div>
+  </div>
+  <div class="card-body" style="padding:0;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Потребител</th>
+          <th>Присвоени врати</th>
+          <th>Дата на регистрация</th>
+          <th>Статус</th>
+          <th>Действия</th>
+        </tr>
+      </thead>
+      <tbody id="faceTableBody">
+        {% for fe in face_list %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="user-avatar" style="width:32px;height:32px;font-size:11px;">{{ fe.user.initials }}</div>
+              <span style="font-weight:600;">{{ fe.user.name }}</span>
+            </div>
+          </td>
+          <td>
+            {% for fed in fe.doors %}
+              <span class="method-pill method-fp" style="margin-bottom:2px;">
+                <i class="bi bi-door-open" style="font-size:10px;"></i> {{ fed.door.name }}
+              </span>
+            {% else %}
+              <span style="font-size:12px;color:var(--text-muted);">Без присвоени врати</span>
+            {% endfor %}
+          </td>
+          <td style="font-size:13px;color:var(--text-secondary);">
+            <i class="bi bi-calendar3" style="font-size:11px;margin-right:4px;"></i>
+            {{ fe.enrolled_at.strftime('%-d %b %Y') }}
+          </td>
+          <td>
+            <span class="badge-pill {{ 'badge-active' if fe.is_active else 'badge-inactive' }}">
+              {{ 'Активен' if fe.is_active else 'Неактивен' }}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-outline-danger btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#removeFaceModal"
+                    data-fe-id="{{ fe.id }}"
+                    data-fe-user="{{ fe.user.name }}">
+              <i class="bi bi-trash"></i> Премахване
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted);">
+            Няма регистрирани лица.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Модал за регистрация -->
+<div class="modal fade" id="enrollFaceModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <form method="POST" action="{{ url_for('main.enroll_face') }}">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-person-bounding-box me-2 text-primary-color"></i>Регистриране на лице</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+
+          <!-- Live preview -->
+          <div class="mb-3 text-center">
+            <img src="{{ url_for('main.camera_stream') }}"
+                 style="width:100%;max-height:280px;object-fit:cover;border-radius:8px;border:1px solid var(--border);"
+                 alt="Поток на живо">
+            <div style="font-size:12px;color:var(--text-muted);margin-top:6px;">
+              <i class="bi bi-record-circle text-danger"></i> Поток на живо — уверете се, че лицето е ясно видимо
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Изберете потребител</label>
+            <select class="form-select" name="user_id" required>
+              <option value="" disabled selected>Изберете потребител за регистрация…</option>
+              {% for user in users %}
+              <option value="{{ user.id }}">{{ user.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Присвояване към врати</label>
+            {% for door in all_doors %}
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="doors" value="{{ door.id }}" id="door_face_{{ door.id }}"
+                     {% if not door.method_face %}disabled title="Лицевото разпознаване не е включено за тази врата"{% endif %}>
+              <label class="form-check-label" for="door_face_{{ door.id }}">
+                {{ door.name }}{% if door.location %} — {{ door.location }}{% endif %}
+                {% if not door.method_face %}
+                  <span style="font-size:11px;color:var(--text-muted);">(лицевото разпознаване е изключено)</span>
+                {% endif %}
+              </label>
+            </div>
+            {% else %}
+            <div style="font-size:13px;color:var(--text-muted);">Все още няма настроени врати.</div>
+            {% endfor %}
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отказ</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-camera"></i> Заснемане и регистрация
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Модал за премахване -->
+<div class="modal fade" id="removeFaceModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-body text-center" style="padding:28px;">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--danger-light);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:22px;color:var(--danger);">
+          <i class="bi bi-trash"></i>
+        </div>
+        <h5 style="font-size:16px;font-weight:700;margin-bottom:8px;">Премахване на регистрация?</h5>
+        <p style="font-size:13.5px;color:var(--text-secondary);margin:0 0 20px;">
+          Това ще изтрие завинаги регистрацията на лицето на <strong id="removeFaceUser"></strong>.
+        </p>
+        <div style="display:flex;gap:10px;justify-content:center;">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Отказ</button>
+          <form id="removeFaceForm" method="POST" action="" style="display:inline;">
+            <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Премахни</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('removeFaceModal').addEventListener('show.bs.modal', function (event) {
+  var btn    = event.relatedTarget;
+  document.getElementById('removeFaceUser').textContent = btn.getAttribute('data-fe-user');
+  document.getElementById('removeFaceForm').action = '/faces/' + btn.getAttribute('data-fe-id') + '/remove';
+});
+
+document.getElementById('faceSearch').addEventListener('input', function () {
+  var term = this.value.toLowerCase();
+  document.querySelectorAll('#faceTableBody tr').forEach(function (row) {
+    row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+  });
+});
+</script>
+
+{% endblock %}

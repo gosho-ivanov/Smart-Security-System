@@ -19,8 +19,9 @@ class User(UserMixin, db.Model):
     last_login    = db.Column(db.DateTime)
 
     # Relationships
-    pin_codes    = db.relationship('PinCode',     backref='user', lazy=True, cascade='all, delete-orphan')
-    fingerprints = db.relationship('Fingerprint', backref='user', lazy=True, cascade='all, delete-orphan')
+    pin_codes      = db.relationship('PinCode',        backref='user', lazy=True, cascade='all, delete-orphan')
+    fingerprints   = db.relationship('Fingerprint',    backref='user', lazy=True, cascade='all, delete-orphan')
+    face_encodings = db.relationship('FaceEncoding',   backref='user', lazy=True, cascade='all, delete-orphan')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -52,6 +53,7 @@ class Door(db.Model):
     is_locked    = db.Column(db.Boolean, default=True)
     method_pin   = db.Column(db.Boolean, default=True)
     method_fp    = db.Column(db.Boolean, default=False)
+    method_face  = db.Column(db.Boolean, default=False)
     last_access  = db.Column(db.DateTime)
     created_at   = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -143,3 +145,27 @@ class AccessLog(db.Model):
 
     def __repr__(self):
         return f'<AccessLog door={self.door_id} success={self.success}>'
+
+
+# ── FaceEncoding ──────────────────────────────────────────
+class FaceEncoding(db.Model):
+    __tablename__ = 'face_encodings'
+
+    id          = db.Column(db.Integer, primary_key=True)
+    user_id     = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    label       = db.Column(db.String(120), nullable=False)
+    encoding    = db.Column(db.LargeBinary, nullable=False)   # 128-d float64 as raw bytes
+    is_active   = db.Column(db.Boolean, default=True)
+    enrolled_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    doors = db.relationship('FaceEncodingDoor', backref='face_encoding', lazy=True, cascade='all, delete-orphan')
+
+    def __repr__(self):
+        return f'<FaceEncoding user_id={self.user_id}>'
+
+
+# ── FaceEncodingDoor (many-to-many) ───────────────────────
+class FaceEncodingDoor(db.Model):
+    __tablename__ = 'face_encoding_doors'
+    face_encoding_id = db.Column(db.Integer, db.ForeignKey('face_encodings.id'), primary_key=True)
+    door_id          = db.Column(db.Integer, db.ForeignKey('doors.id'),          primary_key=True)

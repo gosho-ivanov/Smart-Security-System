@@ -1,9 +1,12 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
+from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, Response
 from flask_login import login_required, current_user
 from datetime import datetime
 
 from ..extensions import db
-from ..models import User, Door, PinCode, PinCodeDoor, Fingerprint, FingerprintDoor, AccessLog
+from ..models import (User, Door, PinCode, PinCodeDoor,
+                      Fingerprint, FingerprintDoor,
+                      FaceEncoding, FaceEncodingDoor,
+                      AccessLog)
 from .. import fingerprint_sensor
 
 main_bp = Blueprint('main', __name__)
@@ -42,6 +45,18 @@ def dashboard():
 @login_required
 def cameras():
     return render_template('main/cameras.html')
+
+
+@main_bp.route('/cameras/stream')
+@login_required
+def camera_stream():
+    from .. import camera
+    if not camera._CV2_AVAILABLE:
+        abort(503)
+    return Response(
+        camera.generate_frames(),
+        mimetype='multipart/x-mixed-replace; boundary=frame',
+    )
 
 
 # ── Doors ─────────────────────────────────────────────────
@@ -219,6 +234,69 @@ def remove_fingerprint(fp_id):
     db.session.commit()
     flash('Отпечатъкът е премахнат.', 'success')
     return redirect(url_for('main.fingerprints'))
+
+
+# ── Face Recognition ──────────────────────────────────────
+@main_bp.route('/faces')
+@login_required
+def faces():
+    face_list = FaceEncoding.query.join(User).order_by(FaceEncoding.enrolled_at.desc()).all()
+    users     = User.query.filter_by(is_active=True).all()
+    doors     = Door.query.filter_by(method_face=True).all()
+    all_doors = Door.query.all()
+    return render_template('main/faces.html',
+                           face_list=face_list, users=users,
+                           doors=doors, all_doors=all_doors)
+
+
+@main_bp.route('/faces/enroll', methods=['POST'])
+@login_required
+def enroll_face():
+    user_id  = request.form.get('user_id')
+    door_ids = request.form.getlist('doors')
+
+    if not user_id:
+        flash('Моля, изберете потребител.', 'danger')
+        return redirect(url_for('main.faces'))
+
+    from .. import camera, face_detector
+
+    frame = camera.get_frame()
+    if frame is None:
+        flash('Камерата не е достъпна. Проверете връзката.', 'danger')
+        return redirect(url_for('main.faces'))
+
+    try:
+        enc_bytes = face_detector.encode_face(frame)
+    except RuntimeError as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('main.faces'))
+
+    if enc_bytes is None:
+        flash('Не беше засечено лице пред камерата. Уверете се, че лицето е ясно видимо и опитайте отново.', 'warning')
+        return redirect(url_for('main.faces'))
+
+    user  = User.query.get_or_404(int(user_id))
+    fe    = FaceEncoding(user_id=user.id, label=user.name, encoding=enc_bytes)
+    db.session.add(fe)
+    db.session.flush()
+
+    for door_id in door_ids:
+        db.session.add(FaceEncodingDoor(face_encoding_id=fe.id, door_id=int(door_id)))
+
+    db.session.commit()
+    flash(f'Лицето на {user.name} е регистрирано успешно.', 'success')
+    return redirect(url_for('main.faces'))
+
+
+@main_bp.route('/faces/<int:fe_id>/remove', methods=['POST'])
+@login_required
+def remove_face(fe_id):
+    fe = FaceEncoding.query.get_or_404(fe_id)
+    db.session.delete(fe)
+    db.session.commit()
+    flash('Регистрацията на лицето е премахната.', 'success')
+    return redirect(url_for('main.faces'))
 
 
 # ── Allowed Personnel ─────────────────────────────────────

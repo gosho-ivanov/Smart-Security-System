@@ -4,7 +4,9 @@ Usage: python init_db.py
 """
 from security_system import create_app
 from security_system.extensions import db
-from security_system.models import User, Door, PinCode, PinCodeDoor, Fingerprint, FingerprintDoor
+from security_system.models import (User, Door, PinCode, PinCodeDoor,
+                                    Fingerprint, FingerprintDoor,
+                                    FaceEncoding, FaceEncodingDoor)
 from datetime import datetime, date
 
 app = create_app()

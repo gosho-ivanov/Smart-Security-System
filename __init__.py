@@ -33,11 +33,12 @@ def create_app(config_class=Config):
     def not_found(e):
         return render_template('error/403.html'), 404
 
-    # Start the keypad listener in a background daemon thread.
-    # In debug mode Werkzeug runs two processes; only start in the child
-    # (the actual server) to avoid spawning the thread twice.
+    # Start background hardware threads only in the child Werkzeug process
+    # (debug mode spawns two processes; guard prevents double-start).
     if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
-        from . import keypad_listener
+        from . import camera, keypad_listener, face_recognition_listener
+        camera.start(0)
         keypad_listener.start(app)
+        face_recognition_listener.start(app)
 
     return app
