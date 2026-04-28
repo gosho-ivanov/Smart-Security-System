@@ -57,7 +57,11 @@ def _run(app):
                 buffer.append(key)
                 logger.debug("Keypad buffer: %d digit(s).", len(buffer))
 
-    keypad.listen(handle_key)
+    try:
+        keypad.listen(handle_key)
+    except ImportError:
+        logger.warning("RPi.GPIO is not installed — keypad listener stopped.")
+        return
 
 
 def _verify_and_log(raw_pin):
